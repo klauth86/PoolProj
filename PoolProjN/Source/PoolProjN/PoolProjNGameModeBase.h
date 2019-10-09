@@ -14,7 +14,6 @@ class POOLPROJN_API APoolProjNGameModeBase : public AGameModeBase
 {
 	GENERATED_BODY()
 	
-	
-	
-	
+public:
+	APoolProjNGameModeBase();	
 };

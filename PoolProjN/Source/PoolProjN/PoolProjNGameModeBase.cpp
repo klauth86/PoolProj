@@ -3,7 +3,10 @@
 #pragma once
 
 #include "PoolProjNGameModeBase.h"
+#include "MyPawn.h"
 
-
+APoolProjNGameModeBase::APoolProjNGameModeBase() {
+	DefaultPawnClass = AMyPawn::StaticClass();
+}
 
 
