@@ -8,10 +8,10 @@
 #include "UObject/ConstructorHelpers.h"
 #include "Materials/Material.h"
 
-// #include "GameFramework/CharacterMovementComponent.h"
-#include "Components/ArrowComponent.h"
-#include "Camera/CameraComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "Camera/CameraComponent.h"
+#include "Components/ArrowComponent.h"
 
 #include "MyPawn.generated.h"
 
@@ -30,9 +30,9 @@ private:
 	UPROPERTY(Category = Character, VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 		UStaticMeshComponent* Mesh;
 
-	///** Movement component used for movement logic in various movement modes (walking, falling, etc), containing relevant settings and functions to control movement. */
-	//UPROPERTY(Category = Character, VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-	//	UCharacterMovementComponent* CharacterMovement;
+	/** Movement component used for movement logic in various movement modes (walking, falling, etc), containing relevant settings and functions to control movement. */
+	UPROPERTY(Category = Character, VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+		UCharacterMovementComponent* CharacterMovement;
 
 	/** Camera boom positioning the camera behind the character */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
@@ -52,6 +52,12 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	/** Handles moving forward/backward */
+	void MoveForward(float Val);
+
+	/** Handles stafing movement, left and right */
+	void MoveRight(float Val);
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -62,8 +68,8 @@ public:
 	/** Returns Mesh subobject **/
 	FORCEINLINE class UStaticMeshComponent* GetMesh() const { return Mesh; }
 
-	///** Returns CharacterMovement subobject **/
-	//FORCEINLINE class UCharacterMovementComponent* GetCharacterMovement() const { return CharacterMovement; }
+	/** Returns CharacterMovement subobject **/
+	FORCEINLINE class UCharacterMovementComponent* GetCharacterMovement() const { return CharacterMovement; }
 
 	/** Returns CameraBoom subobject **/
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }

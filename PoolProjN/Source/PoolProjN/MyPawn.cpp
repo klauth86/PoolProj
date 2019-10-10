@@ -20,6 +20,12 @@ AMyPawn::AMyPawn()
 	Mesh->SetSimulatePhysics(true);
 	Mesh->SetNotifyRigidBodyCollision(true);
 
+
+	CharacterMovement = CreateDefaultSubobject<UCharacterMovementComponent>("CharacterMovement");
+	if (CharacterMovement) {
+		CharacterMovement->UpdatedComponent = Mesh;
+	}
+
 	// Create a camera boom (pulls in towards the player if there is a collision)
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
 	CameraBoom->SetupAttachment(RootComponent);
@@ -32,6 +38,15 @@ AMyPawn::AMyPawn()
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName); // Attach the camera to the end of the boom and let the boom adjust to match the controller orientation
 	FollowCamera->bUsePawnControlRotation = false; // Camera does not rotate relative to arm
 	FollowCamera->RelativeRotation = FRotator(-30, 0, 0);
+
+#if WITH_EDITORONLY_DATA
+	ArrowComponent = CreateEditorOnlyDefaultSubobject<UArrowComponent>(TEXT("Arrow"));
+	if (ArrowComponent) {
+		ArrowComponent->ArrowColor = FColor(150, 200, 255);
+		ArrowComponent->bTreatAsASprite = true;
+		ArrowComponent->bIsScreenSizeScaled = true;
+	}
+#endif // WITH_EDITORONLY_DATA
 }
 
 // Called when the game starts or when spawned
@@ -53,5 +68,14 @@ void AMyPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
+	PlayerInputComponent->BindAxis("MoveForward", this, &AMyPawn::MoveForward);
+	PlayerInputComponent->BindAxis("MoveRight", this, &APawn::AddControllerYawInput);
+}
+
+void AMyPawn::MoveForward(float Value) {
+	if (Value != 0.0f) {
+		// add movement in that direction
+		AddMovementInput(GetActorForwardVector(), Value);
+	}
 }
 
