@@ -8,7 +8,7 @@
 #include "UObject/ConstructorHelpers.h"
 #include "Materials/Material.h"
 
-#include "GameFramework/CharacterMovementComponent.h"
+#include "MyPawnMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
 #include "Components/ArrowComponent.h"
@@ -32,7 +32,7 @@ private:
 
 	/** Movement component used for movement logic in various movement modes (walking, falling, etc), containing relevant settings and functions to control movement. */
 	UPROPERTY(Category = Character, VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-		UCharacterMovementComponent* CharacterMovement;
+		UMyPawnMovementComponent* PawnMovement;
 
 	/** Camera boom positioning the camera behind the character */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
@@ -69,7 +69,7 @@ public:
 	FORCEINLINE class UStaticMeshComponent* GetMesh() const { return Mesh; }
 
 	/** Returns CharacterMovement subobject **/
-	FORCEINLINE class UCharacterMovementComponent* GetCharacterMovement() const { return CharacterMovement; }
+	FORCEINLINE class UMyPawnMovementComponent* GetPawnMovement() const { return PawnMovement; }
 
 	/** Returns CameraBoom subobject **/
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
@@ -81,4 +81,6 @@ public:
 	/** Returns ArrowComponent subobject **/
 	FORCEINLINE class UArrowComponent* GetArrowComponent() const { return ArrowComponent; }
 #endif
+
+	virtual void FaceRotation(FRotator NewControlRotation, float DeltaTime = 0.f) override;
 };
