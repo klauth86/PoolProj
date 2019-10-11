@@ -2,16 +2,16 @@
 
 #pragma once
 
+#include "MyPawnMovementComponent.h"
+
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
 
 #include "UObject/ConstructorHelpers.h"
 #include "Materials/Material.h"
 
-#include "MyPawnMovementComponent.h"
-#include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
-#include "Components/ArrowComponent.h"
+#include "Components/PrimitiveComponent.h"
 
 #include "MyPawn.generated.h"
 
@@ -24,6 +24,11 @@ public:
 	// Sets default values for this pawn's properties
 	AMyPawn();
 
+	UPROPERTY(EditAnywhere, Category = MyPawn)
+		float Mass = 1;
+	UPROPERTY(EditAnywhere, Category = MyPawn)
+		float ForceAmount = 10000;
+
 private:
 
 	/** The main skeletal mesh associated with this Character (optional sub-object). */
@@ -34,29 +39,20 @@ private:
 	UPROPERTY(Category = Character, VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 		UMyPawnMovementComponent* PawnMovement;
 
-	/** Camera boom positioning the camera behind the character */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
-		USpringArmComponent* CameraBoom;
-
 	/** Follow camera */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 		UCameraComponent* FollowCamera;
-
-#if WITH_EDITORONLY_DATA
-	/** Component shown in the editor only to indicate character facing */
-	UPROPERTY()
-		UArrowComponent* ArrowComponent;
-#endif
 
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	void PlaceCamera();
+
 	/** Handles moving forward/backward */
 	void MoveForward(float Val);
 
-	/** Handles stafing movement, left and right */
-	void MoveRight(float Val);
+	void Fire();
 
 public:	
 	// Called every frame
@@ -71,16 +67,6 @@ public:
 	/** Returns CharacterMovement subobject **/
 	FORCEINLINE class UMyPawnMovementComponent* GetPawnMovement() const { return PawnMovement; }
 
-	/** Returns CameraBoom subobject **/
-	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
-
 	/** Returns FollowCamera subobject **/
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
-
-#if WITH_EDITORONLY_DATA
-	/** Returns ArrowComponent subobject **/
-	FORCEINLINE class UArrowComponent* GetArrowComponent() const { return ArrowComponent; }
-#endif
-
-	virtual void FaceRotation(FRotator NewControlRotation, float DeltaTime = 0.f) override;
 };
