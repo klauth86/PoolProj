@@ -13,7 +13,7 @@ AMyPawn::AMyPawn()
 	bUseControllerRotationYaw = true;
 
 	RootComponent = Mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> meshAsset(TEXT("StaticMesh'/Game/Models/Ball.Ball'"));
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> meshAsset(TEXT("StaticMesh'/Game/Models/Sphere.Sphere'"));
 	Mesh->SetStaticMesh(meshAsset.Object);
 	static ConstructorHelpers::FObjectFinder<UMaterial> matAsset(TEXT("Material'/Game/Models/Player_MAT.Player_MAT'"));
 	Mesh->SetMaterial(0, matAsset.Object);

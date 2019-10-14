@@ -26,7 +26,7 @@ public:
 	UPROPERTY(EditAnywhere, Category = MyPawn)
 		float Mass = 1;
 	UPROPERTY(EditAnywhere, Category = MyPawn)
-		float ForceAmount = 10000;
+		float ForceAmount = 1000000;
 
 private:
 
