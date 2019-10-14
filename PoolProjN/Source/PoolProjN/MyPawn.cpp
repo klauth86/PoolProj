@@ -23,24 +23,19 @@ AMyPawn::AMyPawn()
 	Mesh->SetNotifyRigidBodyCollision(true);
 
 	PawnMovement = CreateDefaultSubobject<UMyPawnMovementComponent>("CharacterMovement");
-
-	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
-	FollowCamera->SetupAttachment(RootComponent);
-	PlaceCamera();
 }
 
 // Called when the game starts or when spawned
 void AMyPawn::BeginPlay()
 {
 	Super::BeginPlay();
-	
+	PlaceCamera();
 }
 
 // Called every frame
 void AMyPawn::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	PlaceCamera();
 }
 
 // Called to bind functionality to input
@@ -62,10 +57,12 @@ void AMyPawn::MoveForward(float Value) {
 }
 
 void AMyPawn::PlaceCamera() {
-	if (FollowCamera) {
-		FollowCamera->RelativeLocation = FVector(-600, 0, 300);
-		FollowCamera->RelativeRotation = FRotator(-30, 0, 0);
-	}
+	static const FName NAME_FreeCam_Default = FName(TEXT("FreeCam_Default"));
+
+	APlayerController* const PC = CastChecked<APlayerController>(Controller);
+	PC->PlayerCameraManager->CameraStyle = NAME_FreeCam_Default;
+	PC->PlayerCameraManager->FreeCamOffset = FVector(0, 0, 300);
+	PC->PlayerCameraManager->FreeCamDistance = 600;
 }
 
 void AMyPawn::Fire() {

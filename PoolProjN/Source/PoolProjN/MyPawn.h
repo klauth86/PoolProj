@@ -10,7 +10,6 @@
 #include "UObject/ConstructorHelpers.h"
 #include "Materials/Material.h"
 
-#include "Camera/CameraComponent.h"
 #include "Components/PrimitiveComponent.h"
 
 #include "MyPawn.generated.h"
@@ -39,10 +38,6 @@ private:
 	UPROPERTY(Category = Character, VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 		UMyPawnMovementComponent* PawnMovement;
 
-	/** Follow camera */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
-		UCameraComponent* FollowCamera;
-
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -66,7 +61,4 @@ public:
 
 	/** Returns CharacterMovement subobject **/
 	FORCEINLINE class UMyPawnMovementComponent* GetPawnMovement() const { return PawnMovement; }
-
-	/** Returns FollowCamera subobject **/
-	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
 };
