@@ -13,7 +13,7 @@ AMyPawn::AMyPawn()
 	bUseControllerRotationYaw = true;
 
 	RootComponent = Mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> meshAsset(TEXT("StaticMesh'/Game/Models/Cube.Cube'"));
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> meshAsset(TEXT("StaticMesh'/Game/Models/Ball.Ball'"));
 	Mesh->SetStaticMesh(meshAsset.Object);
 	static ConstructorHelpers::FObjectFinder<UMaterial> matAsset(TEXT("Material'/Game/Models/Player_MAT.Player_MAT'"));
 	Mesh->SetMaterial(0, matAsset.Object);
@@ -29,7 +29,7 @@ AMyPawn::AMyPawn()
 void AMyPawn::BeginPlay()
 {
 	Super::BeginPlay();
-	PlaceCamera();
+	InitPlayerCameraManager();
 }
 
 // Called every frame
@@ -56,13 +56,17 @@ void AMyPawn::MoveForward(float Value) {
 	}
 }
 
-void AMyPawn::PlaceCamera() {
+void AMyPawn::InitPlayerCameraManager() {
 	static const FName NAME_FreeCam_Default = FName(TEXT("FreeCam_Default"));
 
 	APlayerController* const PC = CastChecked<APlayerController>(Controller);
 	PC->PlayerCameraManager->CameraStyle = NAME_FreeCam_Default;
 	PC->PlayerCameraManager->FreeCamOffset = FVector(0, 0, 300);
 	PC->PlayerCameraManager->FreeCamDistance = 600;
+
+	auto cache = PC->PlayerCameraManager->CameraCache;
+	cache.POV.Rotation = FRotator(0, 30, 0);
+	PC->PlayerCameraManager->CameraCache = cache;
 }
 
 void AMyPawn::Fire() {

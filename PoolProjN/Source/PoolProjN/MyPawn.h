@@ -42,7 +42,7 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-	void PlaceCamera();
+	void InitPlayerCameraManager();
 
 	/** Handles moving forward/backward */
 	void MoveForward(float Val);
