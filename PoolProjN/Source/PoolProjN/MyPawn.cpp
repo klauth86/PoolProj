@@ -64,5 +64,15 @@ void AMyPawn::InitPlayerCameraManager() {
 }
 
 void AMyPawn::Fire() {
-	Mesh->AddForce(ForceAmount * GetActorForwardVector());
+	if (!IsInFireMode) {
+		Mesh->AddForce(ForceAmount * GetActorForwardVector());
+		IsInFireMode = true;
+	}
+	else {
+		Mesh->SetMobility(EComponentMobility::Type::Static);
+		IsInFireMode = false;
+
+		Mesh->SetMobility(EComponentMobility::Type::Movable);
+		SetActorRotation(FRotator::ZeroRotator);
+	}
 }

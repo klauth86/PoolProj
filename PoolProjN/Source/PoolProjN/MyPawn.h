@@ -30,6 +30,9 @@ public:
 		float ForceAmount = 760000; // IN Newtons
 	// https://billiards.colostate.edu/technical_proofs/new/TP_B-20.pdf
 
+	UPROPERTY(VisibleAnywhere, Category = MyPawn)
+		bool IsInFireMode = false; // In Kg
+
 private:
 
 	/** The main skeletal mesh associated with this Character (optional sub-object). */
