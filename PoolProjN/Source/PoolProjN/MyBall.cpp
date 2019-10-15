@@ -19,5 +19,8 @@ AMyBall::AMyBall()
 	Mesh->SetMassOverrideInKg("", Mass, true);
 	Mesh->SetSimulatePhysics(true);
 	Mesh->SetNotifyRigidBodyCollision(true);
+
+	Mesh->BodyInstance.bUseCCD = true;
+	Mesh->SetCollisionProfileName(TEXT("BlockAll"));
 }
 

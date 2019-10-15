@@ -22,6 +22,9 @@ AMyPawn::AMyPawn()
 	Mesh->SetSimulatePhysics(true);
 	Mesh->SetNotifyRigidBodyCollision(true);
 
+	Mesh->BodyInstance.bUseCCD = true;
+	//Mesh->SetCollisionProfileName(TEXT("BlockAll"));
+
 	PawnMovement = CreateDefaultSubobject<UMyPawnMovementComponent>("CharacterMovement");
 }
 
