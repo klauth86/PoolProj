@@ -32,12 +32,6 @@ void AMyPawn::BeginPlay()
 	InitPlayerCameraManager();
 }
 
-// Called every frame
-void AMyPawn::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-}
-
 // Called to bind functionality to input
 void AMyPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {

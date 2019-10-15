@@ -24,9 +24,11 @@ public:
 	AMyPawn();
 
 	UPROPERTY(EditAnywhere, Category = MyPawn)
-		float Mass = 1;
+		float Mass = 1; // In Kg
+
 	UPROPERTY(EditAnywhere, Category = MyPawn)
-		float ForceAmount = 1000000;
+		float ForceAmount = 760000; // IN Newtons
+	// https://billiards.colostate.edu/technical_proofs/new/TP_B-20.pdf
 
 private:
 
@@ -49,10 +51,7 @@ protected:
 
 	void Fire();
 
-public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
-
+public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
