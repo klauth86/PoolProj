@@ -10,22 +10,27 @@ AMyPawn::AMyPawn()
  	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
+	SetRemoteRoleForBackwardsCompat(ROLE_SimulatedProxy);
+	bReplicates = true;
+	NetPriority = 3.0f;
+
 	bUseControllerRotationYaw = true;
 
-	RootComponent = Mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
+	RootComponent = MeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MeshComponent"));
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> meshAsset(TEXT("StaticMesh'/Game/Models/Sphere.Sphere'"));
-	Mesh->SetStaticMesh(meshAsset.Object);
+	MeshComponent->SetStaticMesh(meshAsset.Object);
 	static ConstructorHelpers::FObjectFinder<UMaterial> matAsset(TEXT("Material'/Game/Models/Player_MAT.Player_MAT'"));
-	Mesh->SetMaterial(0, matAsset.Object);
+	MeshComponent->SetMaterial(0, matAsset.Object);
 
-	Mesh->SetMassOverrideInKg("", Mass, true);
-	Mesh->SetSimulatePhysics(true);
-	Mesh->SetNotifyRigidBodyCollision(true);
+	MeshComponent->SetMassOverrideInKg("", Mass, true);
+	MeshComponent->SetSimulatePhysics(true);
+	MeshComponent->SetNotifyRigidBodyCollision(true);
 
-	Mesh->BodyInstance.bUseCCD = true;
-	//Mesh->SetCollisionProfileName(TEXT("BlockAll"));
+	MeshComponent->BodyInstance.bUseCCD = true;
+	MeshComponent->SetCollisionProfileName(TEXT("BlockAll"));
+	MeshComponent->AlwaysLoadOnClient = true;
 
-	PawnMovement = CreateDefaultSubobject<UMyPawnMovementComponent>("CharacterMovement");
+	MovementComponent = CreateDefaultSubobject<UMyPawnMovementComponent>("MovementComponent");
 }
 
 // Called when the game starts or when spawned
@@ -54,28 +59,28 @@ void AMyPawn::MoveForward(float Value) {
 }
 
 void AMyPawn::InitPlayerCameraManager() {
-	static const FName NAME_FreeCam_Default = FName(TEXT("FreeCam_Default"));
+	//static const FName NAME_FreeCam_Default = FName(TEXT("FreeCam_Default"));
 
-	APlayerController* const PC = CastChecked<APlayerController>(Controller);
-	PC->PlayerCameraManager->CameraStyle = NAME_FreeCam_Default;
-	PC->PlayerCameraManager->FreeCamOffset = FVector(0, 0, 300);
-	PC->PlayerCameraManager->FreeCamDistance = 600;
+	//APlayerController* const PC = CastChecked<APlayerController>(Controller);
+	//PC->PlayerCameraManager->CameraStyle = NAME_FreeCam_Default;
+	//PC->PlayerCameraManager->FreeCamOffset = FVector(0, 0, 300);
+	//PC->PlayerCameraManager->FreeCamDistance = 600;
 
-	auto cache = PC->PlayerCameraManager->CameraCache;
-	cache.POV.Rotation = FRotator(0, 30, 0);
-	PC->PlayerCameraManager->CameraCache = cache;
+	//auto cache = PC->PlayerCameraManager->CameraCache;
+	//cache.POV.Rotation = FRotator(0, 30, 0);
+	//PC->PlayerCameraManager->CameraCache = cache;
 }
 
 void AMyPawn::Fire() {
 	if (!IsInFireMode) {
-		Mesh->AddForce(ForceAmount * GetActorForwardVector());
+		MeshComponent->AddForce(ForceAmount * GetActorForwardVector());
 		IsInFireMode = true;
 	}
 	else {
-		Mesh->SetMobility(EComponentMobility::Type::Static);
+		MeshComponent->SetMobility(EComponentMobility::Type::Static);
 		IsInFireMode = false;
 
-		Mesh->SetMobility(EComponentMobility::Type::Movable);
+		MeshComponent->SetMobility(EComponentMobility::Type::Movable);
 		SetActorRotation(FRotator::ZeroRotator);
 	}
 }

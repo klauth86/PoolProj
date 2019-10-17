@@ -34,33 +34,31 @@ public:
 		bool IsInFireMode = false; // In Kg
 
 private:
-
-	/** The main skeletal mesh associated with this Character (optional sub-object). */
+	/** The main mesh associated with this Pawn (optional sub-object). */
 	UPROPERTY(Category = Character, VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-		UStaticMeshComponent* Mesh;
+		UStaticMeshComponent* MeshComponent;
 
 	/** Movement component used for movement logic in various movement modes (walking, falling, etc), containing relevant settings and functions to control movement. */
 	UPROPERTY(Category = Character, VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-		UMyPawnMovementComponent* PawnMovement;
+		UMyPawnMovementComponent* MovementComponent;
 
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-
-	void InitPlayerCameraManager();
 
 	/** Handles moving forward/backward */
 	void MoveForward(float Val);
 
 	void Fire();
 
-public:
+	void InitPlayerCameraManager();
+
+protected:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-	/** Returns Mesh subobject **/
-	FORCEINLINE class UStaticMeshComponent* GetMesh() const { return Mesh; }
+public:
+	FORCEINLINE class UStaticMeshComponent* GetMeshComponent() const { return MeshComponent; }
 
-	/** Returns CharacterMovement subobject **/
-	FORCEINLINE class UMyPawnMovementComponent* GetPawnMovement() const { return PawnMovement; }
+	FORCEINLINE virtual UPawnMovementComponent* GetMovementComponent() const override { return MovementComponent; };
 };
