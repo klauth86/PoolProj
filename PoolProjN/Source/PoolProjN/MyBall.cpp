@@ -10,6 +10,10 @@ AMyBall::AMyBall()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
+	bReplicates = true;
+	bReplicateMovement = true;
+	NetPriority = 2.0f;
+
 	RootComponent = Mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> meshAsset(TEXT("StaticMesh'/Game/Models/Sphere.Sphere'"));
 	Mesh->SetStaticMesh(meshAsset.Object);

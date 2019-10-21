@@ -36,12 +36,71 @@ UCLASS(config=Game, BlueprintType, meta=(ShortTooltip="A character is a type of 
 class ENGINE_API ACharacter : public APawn
 {
 	GENERATED_BODY()
+public:
+	/** Default UObject constructor. */
+	ACharacter(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
+
+	void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
+protected:
+
+	/** Scale to apply to root motion translation on this Character */
+	UPROPERTY(Replicated)
+	float AnimRootMotionTranslationScale;
 
 public:
+	/** Set whether this actor's movement replicates to network clients. */
+	UFUNCTION(BlueprintCallable, Category=Replication)
+	virtual void SetReplicateMovement(bool bInReplicateMovement) override;
+
+protected:
+
+	/** CharacterMovement ServerLastTransformUpdateTimeStamp value, replicated to simulated proxies. */
+	UPROPERTY(Replicated)
+	float ReplicatedServerLastTransformUpdateTimeStamp;
+
+public:
+	/** Accessor for ReplicatedServerLastTransformUpdateTimeStamp. */
+	FORCEINLINE float GetReplicatedServerLastTransformUpdateTimeStamp() const { return ReplicatedServerLastTransformUpdateTimeStamp; }
+
+	/** Save a new relative location in BasedMovement and a new rotation with is either relative or absolute. */
+	void SaveRelativeBasedMovement(const FVector& NewRelativeLocation, const FRotator& NewRotation, bool bRelativeRotation);
+
+	/** Default crouched eye height */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Camera)
+	float CrouchedEyeHeight;
+
+	/** Set by character movement to specify that this Character is currently crouched. */
+	UPROPERTY(BlueprintReadOnly, replicatedUsing=OnRep_IsCrouched, Category=Character)
+	uint32 bIsCrouched:1;
+
+	/** Handle Crouching replicated from server */
+	UFUNCTION()
+	virtual void OnRep_IsCrouched();
 
 	/** When true, player wants to jump */
 	UPROPERTY(BlueprintReadOnly, Category=Character)
 	uint32 bPressedJump:1;
+
+	/** When true, applying updates to network client (replaying saved moves for a locally controlled character) */
+	UPROPERTY(Transient)
+	uint32 bClientUpdating:1;
+
+	/** True if Pawn was initially falling when started to replay network moves. */
+	UPROPERTY(Transient)
+	uint32 bClientWasFalling:1; 
+
+	/** If server disagrees with root motion track position, client has to resimulate root motion from last AckedMove. */
+	UPROPERTY(Transient)
+	uint32 bClientResimulateRootMotion:1;
+
+	/** If server disagrees with root motion state, client has to resimulate root motion from last AckedMove. */
+	UPROPERTY(Transient)
+	uint32 bClientResimulateRootMotionSources:1;
+
+	/** Disable root motion on the server. When receiving a DualServerMove, where the first move is not root motion and the second is. */
+	UPROPERTY(Transient)
+	uint32 bServerMoveIgnoreRootMotion:1;
 
 	/** Tracks whether or not the character was already jumping last frame. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Transient, Category=Character)
@@ -115,6 +174,17 @@ public:
 	bool CanJump() const;
 
 protected:
+	/**
+	 * Customizable event to check if the character can jump in the current state.
+	 * Default implementation returns true if the character is on the ground and not crouching,
+	 * has a valid CharacterMovementComponent and CanEverJump() returns true.
+	 * Default implementation also allows for 'hold to jump higher' functionality: 
+	 * As well as returning true when on the ground, it also returns true when GetMaxJumpTime is more
+	 * than zero and IsJumping returns true.
+	 * 
+	 *
+	 * @Return Whether the character can jump in the current state. 
+	 */
 	UFUNCTION(BlueprintNativeEvent, Category=Character, meta=(DisplayName="CanJump"))
 	bool CanJumpInternal() const;
 	virtual bool CanJumpInternal_Implementation() const;
@@ -130,6 +200,18 @@ public:
 	 */
 	UFUNCTION(BlueprintCallable, Category=Character)
 	virtual bool IsJumpProvidingForce() const;
+
+	/** Play Animation Montage on the character mesh **/
+	UFUNCTION(BlueprintCallable, Category=Animation)
+	virtual float PlayAnimMontage(class UAnimMontage* AnimMontage, float InPlayRate = 1.f, FName StartSectionName = NAME_None);
+
+	/** Stop Animation Montage. If nullptr, it will stop what's currently active. The Blend Out Time is taken from the montage asset that is being stopped. **/
+	UFUNCTION(BlueprintCallable, Category=Animation)
+	virtual void StopAnimMontage(class UAnimMontage* AnimMontage = nullptr);
+
+	/** Return current playing Montage **/
+	UFUNCTION(BlueprintCallable, Category=Animation)
+	class UAnimMontage* GetCurrentMontage();
 
 	/**
 	 * Set a pending launch velocity on the Character. This velocity will be processed on the next CharacterMovementComponent tick,
@@ -206,6 +288,74 @@ public:
 	virtual void OnWalkingOffLedge_Implementation(const FVector& PreviousFloorImpactNormal, const FVector& PreviousFloorContactNormal, const FVector& PreviousLocation, float TimeDelta);
 
 	/**
+	 * Called when pawn's movement is blocked
+	 * @param Impact describes the blocking hit.
+	 */
+	virtual void MoveBlockedBy(const FHitResult& Impact) {};
+
+	/**
+	 * Request the character to start crouching. The request is processed on the next update of the CharacterMovementComponent.
+	 * @see OnStartCrouch
+	 * @see IsCrouched
+	 * @see CharacterMovement->WantsToCrouch
+	 */
+	UFUNCTION(BlueprintCallable, Category=Character, meta=(HidePin="bClientSimulation"))
+	virtual void Crouch(bool bClientSimulation = false);
+
+	/**
+	 * Request the character to stop crouching. The request is processed on the next update of the CharacterMovementComponent.
+	 * @see OnEndCrouch
+	 * @see IsCrouched
+	 * @see CharacterMovement->WantsToCrouch
+	 */
+	UFUNCTION(BlueprintCallable, Category=Character, meta=(HidePin="bClientSimulation"))
+	virtual void UnCrouch(bool bClientSimulation = false);
+
+	/** @return true if this character is currently able to crouch (and is not currently crouched) */
+	virtual bool CanCrouch();
+
+	/** 
+	 * Called when Character stops crouching. Called on non-owned Characters through bIsCrouched replication.
+	 * @param	HalfHeightAdjust		difference between default collision half-height, and actual crouched capsule half-height.
+	 * @param	ScaledHalfHeightAdjust	difference after component scale is taken in to account.
+	 */
+	virtual void OnEndCrouch(float HalfHeightAdjust, float ScaledHalfHeightAdjust);
+
+	/** 
+	 * Event when Character stops crouching.
+	 * @param	HalfHeightAdjust		difference between default collision half-height, and actual crouched capsule half-height.
+	 * @param	ScaledHalfHeightAdjust	difference after component scale is taken in to account.
+	 */
+	UFUNCTION(BlueprintImplementableEvent, meta=(DisplayName="OnEndCrouch", ScriptName="OnEndCrouch"))
+	void K2_OnEndCrouch(float HalfHeightAdjust, float ScaledHalfHeightAdjust);
+
+	/**
+	 * Called when Character crouches. Called on non-owned Characters through bIsCrouched replication.
+	 * @param	HalfHeightAdjust		difference between default collision half-height, and actual crouched capsule half-height.
+	 * @param	ScaledHalfHeightAdjust	difference after component scale is taken in to account.
+	 */
+	virtual void OnStartCrouch(float HalfHeightAdjust, float ScaledHalfHeightAdjust);
+
+	/**
+	 * Event when Character crouches.
+	 * @param	HalfHeightAdjust		difference between default collision half-height, and actual crouched capsule half-height.
+	 * @param	ScaledHalfHeightAdjust	difference after component scale is taken in to account.
+	 */
+	UFUNCTION(BlueprintImplementableEvent, meta=(DisplayName="OnStartCrouch", ScriptName="OnStartCrouch"))
+	void K2_OnStartCrouch(float HalfHeightAdjust, float ScaledHalfHeightAdjust);
+
+	/**
+	 * Called from CharacterMovementComponent to notify the character that the movement mode has changed.
+	 * @param	PrevMovementMode	Movement mode before the change
+	 * @param	PrevCustomMode		Custom mode before the change (applicable if PrevMovementMode is Custom)
+	 */
+	virtual void OnMovementModeChanged(EMovementMode PrevMovementMode, uint8 PreviousCustomMode = 0);
+
+	/** Multicast delegate for MovementMode changing. */
+	UPROPERTY(BlueprintAssignable, Category=Character)
+	FMovementModeChangedSignature MovementModeChangedDelegate;
+
+	/**
 	 * Called from CharacterMovementComponent to notify the character that the movement mode has changed.
 	 * @param	PrevMovementMode	Movement mode before the change
 	 * @param	NewMovementMode		New movement mode
@@ -270,4 +420,73 @@ public:
 	UFUNCTION(Reliable, Client)
 	void RootMotionDebugClientPrintOnScreen(const FString& InString);
 	virtual void RootMotionDebugClientPrintOnScreen_Implementation(const FString& InString);
+
+	// Root Motion
+
+	/** 
+	 * For LocallyControlled Autonomous clients. 
+	 * During a PerformMovement() after root motion is prepared, we save it off into this and
+	 * then record it into our SavedMoves.
+	 * During SavedMove playback we use it as our "Previous Move" SavedRootMotion which includes
+	 * last received root motion from the Server
+	 */
+	UPROPERTY(Transient)
+	FRootMotionSourceGroup SavedRootMotion;
+
+	/** For LocallyControlled Autonomous clients. Saved root motion data to be used by SavedMoves. */
+	UPROPERTY(Transient)
+	FRootMotionMovementParams ClientRootMotionParams;
+
+	/** Array of previously received root motion moves from the server. */
+	UPROPERTY(Transient)
+	TArray<FSimulatedRootMotionReplicatedMove> RootMotionRepMoves;
+	
+	/** Find usable root motion replicated move from our buffer.
+	 * Goes through the buffer back in time, to find the first move that clears 'CanUseRootMotionRepMove' below.
+	 * Returns index of that move or INDEX_NONE otherwise.
+	 */
+	int32 FindRootMotionRepMove(const FAnimMontageInstance& ClientMontageInstance) const;
+
+	/** True if buffered move is usable to teleport client back to. */
+	bool CanUseRootMotionRepMove(const FSimulatedRootMotionReplicatedMove& RootMotionRepMove, const FAnimMontageInstance& ClientMontageInstance) const;
+
+	/** Restore actor to an old buffered move. */
+	bool RestoreReplicatedMove(const FSimulatedRootMotionReplicatedMove& RootMotionRepMove);
+
+	/** Replicated Root Motion montage */
+	UPROPERTY(ReplicatedUsing=OnRep_RootMotion)
+	struct FRepRootMotionMontage RepRootMotion;
+	
+	/** Handles replicated root motion properties on simulated proxies and position correction. */
+	UFUNCTION()
+	void OnRep_RootMotion();
+
+	/** Position fix up for Simulated Proxies playing Root Motion */
+	void SimulatedRootMotionPositionFixup(float DeltaSeconds);
+
+	/** Get FAnimMontageInstance playing RootMotion */
+	FAnimMontageInstance * GetRootMotionAnimMontageInstance() const;
+
+	/** True if we are playing Root Motion right now */
+	UFUNCTION(BlueprintCallable, Category=Animation)
+	bool IsPlayingRootMotion() const;
+
+	/** Sets scale to apply to root motion translation on this Character */
+	void SetAnimRootMotionTranslationScale(float InAnimRootMotionTranslationScale = 1.f);
+
+	/** Returns current value of AnimRootMotionScale */
+	UFUNCTION(BlueprintCallable, Category=Animation)
+	float GetAnimRootMotionTranslationScale() const;
+
+	/**
+	 * Called on the actor right before replication occurs.
+	 * Only called on Server, and for autonomous proxies if recording a Client Replay.
+	 */
+	virtual void PreReplication(IRepChangedPropertyTracker & ChangedPropertyTracker) override;
+
+	/**
+	 * Called on the actor right before replication occurs.
+	 * Called for everyone when recording a Client Replay, including Simulated Proxies.
+	 */
+	virtual void PreReplicationForReplay(IRepChangedPropertyTracker & ChangedPropertyTracker) override;
 };
