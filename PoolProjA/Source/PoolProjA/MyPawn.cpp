@@ -62,6 +62,7 @@ void AMyPawn::MoveForward(float Value) {
 		AddMovementInput(GetActorForwardVector(), Value);
 	}
 	else {
+		UE_LOG(LogTemp, Warning, TEXT("DrawRay"));
 		DrawRay();
 	}
 }
@@ -85,5 +86,5 @@ void AMyPawn::DrawRay() {
 	auto forward = this->GetActorForwardVector();
 
 	DrawDebugLine(GetWorld(), location, location + forward * Sight,
-		FColor(255, 0, 0), false, 0.01f, 0.f, 1.f);
+		FColor(255, 0, 0), false, 0.5f, 0.f, 3.f);
 }

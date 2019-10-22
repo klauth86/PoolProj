@@ -28,7 +28,7 @@ public:
 
 
 	UPROPERTY(EditAnywhere, Category = MyPawn)
-		float Sight = 500; // In Sm
+		float Sight = 5000; // In Sm
 
 	UPROPERTY(EditAnywhere, Category = MyPawn)
 		float Mass = 1; // In Kg
