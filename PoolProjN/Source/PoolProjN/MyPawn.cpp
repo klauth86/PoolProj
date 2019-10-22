@@ -1,266 +1,86 @@
-// Copyright 1998-2018 Epic Games, Inc. All Rights Reserved.
+// Fill out your copyright notice in the Description page of Project Settings.
 
-/*=============================================================================
-	Character.cpp: ACharacter implementation
-=============================================================================*/
+#pragma once
 
-#include "GameFramework/Character.h"
-#include "GameFramework/DamageType.h"
-#include "Components/SkinnedMeshComponent.h"
-#include "Components/SkeletalMeshComponent.h"
-#include "Components/ArrowComponent.h"
-#include "Engine/CollisionProfile.h"
-#include "Components/CapsuleComponent.h"
-#include "GameFramework/CharacterMovementComponent.h"
-#include "Net/UnrealNetwork.h"
-#include "DisplayDebugHelpers.h"
-#include "Engine/Canvas.h"
-#include "Animation/AnimInstance.h"
+#include "MyPawn.h"
 
-DEFINE_LOG_CATEGORY_STATIC(LogCharacter, Log, All);
-DEFINE_LOG_CATEGORY_STATIC(LogAvatar, Log, All);
-
-DECLARE_CYCLE_STAT(TEXT("Char OnNetUpdateSimulatedPosition"), STAT_CharacterOnNetUpdateSimulatedPosition, STATGROUP_Character);
-
-FName ACharacter::MeshComponentName(TEXT("CharacterMesh0"));
-FName ACharacter::CharacterMovementComponentName(TEXT("CharMoveComp"));
-FName ACharacter::CapsuleComponentName(TEXT("CollisionCylinder"));
-
-ACharacter::ACharacter(const FObjectInitializer& ObjectInitializer)
-: Super(ObjectInitializer)
+// Sets default values
+AMyPawn::AMyPawn()
 {
-	// Structure to hold one-time initialization
-	struct FConstructorStatics
-	{
-		FName ID_Characters;
-		FText NAME_Characters;
-		FConstructorStatics()
-			: ID_Characters(TEXT("Characters"))
-			, NAME_Characters(NSLOCTEXT("SpriteCategory", "Characters", "Characters"))
-		{
-		}
-	};
-	static FConstructorStatics ConstructorStatics;
+ 	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	PrimaryActorTick.bCanEverTick = true;
 
-	// Character rotation only changes in Yaw, to prevent the capsule from changing orientation.
-	// Ask the Controller for the full rotation if desired (ie for aiming).
-	bUseControllerRotationPitch = false;
-	bUseControllerRotationRoll = false;
+	SetRemoteRoleForBackwardsCompat(ROLE_SimulatedProxy);
+	bReplicates = true;
+	NetPriority = 3.0f;
+
 	bUseControllerRotationYaw = true;
 
-	CapsuleComponent = CreateDefaultSubobject<UCapsuleComponent>(ACharacter::CapsuleComponentName);
-	CapsuleComponent->InitCapsuleSize(34.0f, 88.0f);
-	CapsuleComponent->SetCollisionProfileName(UCollisionProfile::Pawn_ProfileName);
+	RootComponent = MeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MeshComponent"));
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> meshAsset(TEXT("StaticMesh'/Game/Models/Sphere.Sphere'"));
+	MeshComponent->SetStaticMesh(meshAsset.Object);
+	static ConstructorHelpers::FObjectFinder<UMaterial> matAsset(TEXT("Material'/Game/Models/Player_MAT.Player_MAT'"));
+	MeshComponent->SetMaterial(0, matAsset.Object);
 
-	CapsuleComponent->CanCharacterStepUpOn = ECB_No;
-	CapsuleComponent->bShouldUpdatePhysicsVolume = true;
-	CapsuleComponent->bCheckAsyncSceneOnMove = false;
-	CapsuleComponent->SetCanEverAffectNavigation(false);
-	CapsuleComponent->bDynamicObstacle = true;
-	RootComponent = CapsuleComponent;
+	MeshComponent->SetMassOverrideInKg("", Mass, true);
+	MeshComponent->SetSimulatePhysics(true);
+	MeshComponent->SetNotifyRigidBodyCollision(true);
 
-	bClientCheckEncroachmentOnNetUpdate = true;
-	JumpKeyHoldTime = 0.0f;
-	JumpMaxHoldTime = 0.0f;
-    JumpMaxCount = 1;
-    JumpCurrentCount = 0;
-    bWasJumping = false;
+	MeshComponent->BodyInstance.bUseCCD = true;
+	MeshComponent->SetCollisionProfileName(TEXT("BlockAll"));
+	MeshComponent->AlwaysLoadOnClient = true;
 
-	AnimRootMotionTranslationScale = 1.0f;
-
-#if WITH_EDITORONLY_DATA
-	ArrowComponent = CreateEditorOnlyDefaultSubobject<UArrowComponent>(TEXT("Arrow"));
-	if (ArrowComponent)
-	{
-		ArrowComponent->ArrowColor = FColor(150, 200, 255);
-		ArrowComponent->bTreatAsASprite = true;
-		ArrowComponent->SpriteInfo.Category = ConstructorStatics.ID_Characters;
-		ArrowComponent->SpriteInfo.DisplayName = ConstructorStatics.NAME_Characters;
-		ArrowComponent->SetupAttachment(CapsuleComponent);
-		ArrowComponent->bIsScreenSizeScaled = true;
-	}
-#endif // WITH_EDITORONLY_DATA
-
-	CharacterMovement = CreateDefaultSubobject<UCharacterMovementComponent>(ACharacter::CharacterMovementComponentName);
-	if (CharacterMovement)
-	{
-		CharacterMovement->UpdatedComponent = CapsuleComponent;
-		CrouchedEyeHeight = CharacterMovement->CrouchedHalfHeight * 0.80f;
-	}
-
-	Mesh = CreateOptionalDefaultSubobject<USkeletalMeshComponent>(ACharacter::MeshComponentName);
-	if (Mesh)
-	{
-		Mesh->AlwaysLoadOnClient = true;
-		Mesh->AlwaysLoadOnServer = true;
-		Mesh->bOwnerNoSee = false;
-		Mesh->MeshComponentUpdateFlag = EMeshComponentUpdateFlag::AlwaysTickPose;
-		Mesh->bCastDynamicShadow = true;
-		Mesh->bAffectDynamicIndirectLighting = true;
-		Mesh->PrimaryComponentTick.TickGroup = TG_PrePhysics;
-		Mesh->SetupAttachment(CapsuleComponent);
-		static FName MeshCollisionProfileName(TEXT("CharacterMesh"));
-		Mesh->SetCollisionProfileName(MeshCollisionProfileName);
-		Mesh->bGenerateOverlapEvents = false;
-		Mesh->SetCanEverAffectNavigation(false);
-	}
-
-	BaseRotationOffset = FQuat::Identity;
+	MovementComponent = CreateDefaultSubobject<UMyPawnMovementComponent>("MovementComponent");
 }
 
-void ACharacter::OnWalkingOffLedge_Implementation(const FVector& PreviousFloorImpactNormal, const FVector& PreviousFloorContactNormal, const FVector& PreviousLocation, float TimeDelta)
+// Called when the game starts or when spawned
+void AMyPawn::BeginPlay()
 {
+	Super::BeginPlay();
+	InitPlayerCameraManager();
 }
 
-void ACharacter::NotifyJumpApex()
+// Called to bind functionality to input
+void AMyPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
-	// Call delegate callback
-	if (OnReachedJumpApex.IsBound())
-	{
-		OnReachedJumpApex.Broadcast();
+	Super::SetupPlayerInputComponent(PlayerInputComponent);
+
+	PlayerInputComponent->BindAxis("MoveForward", this, &AMyPawn::MoveForward);
+	PlayerInputComponent->BindAxis("MoveRight", this, &APawn::AddControllerYawInput);
+
+	PlayerInputComponent->BindAction("Fire", EInputEvent::IE_Pressed, this, &AMyPawn::Fire);
+}
+
+void AMyPawn::MoveForward(float Value) {
+	if (Value != 0.0f) {
+		// add movement in that direction
+		AddMovementInput(GetActorForwardVector(), Value);
 	}
 }
 
-void ACharacter::Landed(const FHitResult& Hit)
-{
-	OnLanded(Hit);
+void AMyPawn::InitPlayerCameraManager() {
+	//static const FName NAME_FreeCam_Default = FName(TEXT("FreeCam_Default"));
 
-	LandedDelegate.Broadcast(Hit);
+	//APlayerController* const PC = CastChecked<APlayerController>(Controller);
+	//PC->PlayerCameraManager->CameraStyle = NAME_FreeCam_Default;
+	//PC->PlayerCameraManager->FreeCamOffset = FVector(0, 0, 300);
+	//PC->PlayerCameraManager->FreeCamDistance = 600;
+
+	//auto cache = PC->PlayerCameraManager->CameraCache;
+	//cache.POV.Rotation = FRotator(0, 30, 0);
+	//PC->PlayerCameraManager->CameraCache = cache;
 }
 
-bool ACharacter::CanJump() const
-{
-	return CanJumpInternal();
-}
-
-bool ACharacter::CanJumpInternal_Implementation() const
-{
-	// Ensure the character isn't currently crouched.
-	bool bCanJump = !bIsCrouched;
-
-	// Ensure that the CharacterMovement state is valid
-	bCanJump &= CharacterMovement &&
-				CharacterMovement->IsJumpAllowed() &&
-				!CharacterMovement->bWantsToCrouch &&
-				// Can only jump from the ground, or multi-jump if already falling.
-				(CharacterMovement->IsMovingOnGround() || CharacterMovement->IsFalling());
-
-	if (bCanJump)
-	{
-		// Ensure JumpHoldTime and JumpCount are valid.
-		if (GetJumpMaxHoldTime() <= 0.0f || !bWasJumping)
-		{
-			if (JumpCurrentCount == 0 && CharacterMovement->IsFalling())
-			{
-				bCanJump = JumpCurrentCount + 1 < JumpMaxCount;
-			}
-			else
-			{
-				bCanJump = JumpCurrentCount < JumpMaxCount;
-			}
-		}
-		else
-		{
-			// Only consider IsJumpProviding force as long as:
-			// A) The jump limit hasn't been met OR
-			// B) The jump limit has been met AND we were already jumping
-			bCanJump = (IsJumpProvidingForce()) &&
-						(JumpCurrentCount < JumpMaxCount ||
-						(bWasJumping && JumpCurrentCount == JumpMaxCount));
-		}
+void AMyPawn::Fire() {
+	if (!IsInFireMode) {
+		MeshComponent->AddForce(ForceAmount * GetActorForwardVector());
+		IsInFireMode = true;
 	}
+	else {
+		MeshComponent->SetMobility(EComponentMobility::Type::Static);
+		IsInFireMode = false;
 
-	return bCanJump;
-}
-
-void ACharacter::ResetJumpState()
-{
-	bWasJumping = false;
-	JumpKeyHoldTime = 0.0f;
-
-	if (CharacterMovement && !CharacterMovement->IsFalling())
-	{
-		JumpCurrentCount = 0;
+		MeshComponent->SetMobility(EComponentMobility::Type::Movable);
+		SetActorRotation(FRotator::ZeroRotator);
 	}
 }
-
-void ACharacter::OnJumped_Implementation()
-{
-}
-
-bool ACharacter::IsJumpProvidingForce() const
-{
-	return (bPressedJump && JumpKeyHoldTime < GetJumpMaxHoldTime());
-}
-
-
-
-void ACharacter::ApplyDamageMomentum(float DamageTaken, FDamageEvent const& DamageEvent, APawn* PawnInstigator, AActor* DamageCauser)
-{
-	UDamageType const* const DmgTypeCDO = DamageEvent.DamageTypeClass->GetDefaultObject<UDamageType>();
-	float const ImpulseScale = DmgTypeCDO->DamageImpulse;
-
-	if ( (ImpulseScale > 3.f) && (CharacterMovement != nullptr) )
-	{
-		FHitResult HitInfo;
-		FVector ImpulseDir;
-		DamageEvent.GetBestHitInfo(this, PawnInstigator, HitInfo, ImpulseDir);
-
-		FVector Impulse = ImpulseDir * ImpulseScale;
-		bool const bMassIndependentImpulse = !DmgTypeCDO->bScaleMomentumByMass;
-
-		// limit Z momentum added if already going up faster than jump (to avoid blowing character way up into the sky)
-		{
-			FVector MassScaledImpulse = Impulse;
-			if(!bMassIndependentImpulse && CharacterMovement->Mass > SMALL_NUMBER)
-			{
-				MassScaledImpulse = MassScaledImpulse / CharacterMovement->Mass;
-			}
-
-			if ( (CharacterMovement->Velocity.Z > GetDefault<UCharacterMovementComponent>(CharacterMovement->GetClass())->JumpZVelocity) && (MassScaledImpulse.Z > 0.f) )
-			{
-				Impulse.Z *= 0.5f;
-			}
-		}
-
-		CharacterMovement->AddImpulse(Impulse, bMassIndependentImpulse);
-	}
-}
-
-void ACharacter::LaunchCharacter(FVector LaunchVelocity, bool bXYOverride, bool bZOverride)
-{
-	UE_LOG(LogCharacter, Verbose, TEXT("ACharacter::LaunchCharacter '%s' (%f,%f,%f)"), *GetName(), LaunchVelocity.X, LaunchVelocity.Y, LaunchVelocity.Z);
-
-	if (CharacterMovement)
-	{
-		FVector FinalVel = LaunchVelocity;
-		const FVector Velocity = GetVelocity();
-
-		if (!bXYOverride)
-		{
-			FinalVel.X += Velocity.X;
-			FinalVel.Y += Velocity.Y;
-		}
-		if (!bZOverride)
-		{
-			FinalVel.Z += Velocity.Z;
-		}
-
-		CharacterMovement->Launch(FinalVel);
-
-		OnLaunched(LaunchVelocity, bXYOverride, bZOverride);
-	}
-}
-
-
-void ACharacter::OnMovementModeChanged(EMovementMode PrevMovementMode, uint8 PrevCustomMode)
-{
-	if (!bPressedJump)
-	{
-		ResetJumpState();
-	}
-
-	K2_OnMovementModeChanged(PrevMovementMode, CharacterMovement->MovementMode, PrevCustomMode, CharacterMovement->CustomMovementMode);
-	MovementModeChangedDelegate.Broadcast(this, PrevMovementMode, PrevCustomMode);
-}
-
