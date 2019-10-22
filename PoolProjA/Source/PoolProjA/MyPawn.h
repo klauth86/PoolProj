@@ -11,6 +11,8 @@
 #include "Materials/Material.h"
 
 #include "Components/PrimitiveComponent.h"
+#include "GameFramework/SpringArmComponent.h"
+#include "Camera/CameraComponent.h"
 
 #include "MyPawn.generated.h"
 
@@ -41,16 +43,19 @@ private:
 	UPROPERTY(Category = Character, VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 		UMyPawnMovementComponent* MovementComponent;
 
-protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
+	/** Camera boom positioning the camera behind the character */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
+		class USpringArmComponent* CameraBoom;
 
+	/** Follow camera */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
+		class UCameraComponent* FollowCamera;
+
+protected:
 	/** Handles moving forward/backward */
 	void MoveForward(float Val);
 
 	void Fire();
-
-	void InitPlayerCameraManager();
 
 protected:
 	// Called to bind functionality to input
@@ -60,4 +65,8 @@ public:
 	FORCEINLINE class UStaticMeshComponent* GetMeshComponent() const { return MeshComponent; }
 
 	FORCEINLINE virtual UPawnMovementComponent* GetMovementComponent() const override { return MovementComponent; };
+
+	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
+
+	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
 };

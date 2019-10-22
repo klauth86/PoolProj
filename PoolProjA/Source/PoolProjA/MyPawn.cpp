@@ -21,7 +21,7 @@ AMyPawn::AMyPawn() {
 	RootComponent = MeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MeshComponent"));
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> meshAsset(TEXT("StaticMesh'/Game/Models/Sphere.Sphere'"));
 	MeshComponent->SetStaticMesh(meshAsset.Object);
-	static ConstructorHelpers::FObjectFinder<UMaterial> matAsset(TEXT("Material'/Game/Models/BaseColorMAT_Player.BaseColorMAT_Player'"));
+	static ConstructorHelpers::FObjectFinder<UMaterialInterface> matAsset(TEXT("Material'/Game/Models/BaseColorMAT_Player.BaseColorMAT_Player'"));
 	MeshComponent->SetMaterial(0, matAsset.Object);
 
 	MeshComponent->SetMassOverrideInKg("", Mass, true);
@@ -33,15 +33,21 @@ AMyPawn::AMyPawn() {
 	MeshComponent->AlwaysLoadOnClient = true;
 
 	MovementComponent = CreateDefaultSubobject<UMyPawnMovementComponent>("MovementComponent");
+
+	// Create a camera boom (pulls in towards the player if there is a collision)
+	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
+	CameraBoom->SetupAttachment(RootComponent);
+	CameraBoom->TargetArmLength = 600.0f; // The camera follows at this distance behind the character
+	CameraBoom->SetRelativeRotation(FRotator(-30, 0, 0));
+	CameraBoom->bUsePawnControlRotation = true; // Rotate the arm based on the controller
+	CameraBoom->bInheritPitch = false;
+
+	// Create a follow camera
+	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
+	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName); // Attach the camera to the end of the boom and let the boom adjust to match the controller orientation
+	FollowCamera->bUsePawnControlRotation = false; // Camera does not rotate relative to arm
 }
 
-// Called when the game starts or when spawned
-void AMyPawn::BeginPlay() {
-	Super::BeginPlay();
-	InitPlayerCameraManager();
-}
-
-// Called to bind functionality to input
 void AMyPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
@@ -56,19 +62,6 @@ void AMyPawn::MoveForward(float Value) {
 		// add movement in that direction
 		AddMovementInput(GetActorForwardVector(), Value);
 	}
-}
-
-void AMyPawn::InitPlayerCameraManager() {
-	//static const FName NAME_FreeCam_Default = FName(TEXT("FreeCam_Default"));
-
-	//APlayerController* const PC = CastChecked<APlayerController>(Controller);
-	//PC->PlayerCameraManager->CameraStyle = NAME_FreeCam_Default;
-	//PC->PlayerCameraManager->FreeCamOffset = FVector(0, 0, 300);
-	//PC->PlayerCameraManager->FreeCamDistance = 600;
-
-	//auto cache = PC->PlayerCameraManager->CameraCache;
-	//cache.POV.Rotation = FRotator(0, -30, 0);
-	//PC->PlayerCameraManager->CameraCache = cache;
 }
 
 void AMyPawn::Fire() {
