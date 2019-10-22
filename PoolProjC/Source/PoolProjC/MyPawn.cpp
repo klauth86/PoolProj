@@ -28,7 +28,7 @@ void AMyPawn::GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutLifeti
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	//DOREPLIFETIME_CONDITION(AMyPawn, RepRootMotion, COND_SimulatedOnlyNoReplay);
-	//DOREPLIFETIME_CONDITION(AMyPawn, ReplicatedBasedMovement, COND_SimulatedOnly);
+	DOREPLIFETIME_CONDITION(AMyPawn, ReplicatedBasedMovement, COND_SimulatedOnly);
 	//DOREPLIFETIME_CONDITION(AMyPawn, ReplicatedServerLastTransformUpdateTimeStamp, COND_SimulatedOnlyNoReplay);
 	DOREPLIFETIME_CONDITION(AMyPawn, ReplicatedMovementMode, COND_SimulatedOnly);
 	//DOREPLIFETIME_CONDITION(AMyPawn, AnimRootMotionTranslationScale, COND_SimulatedOnly);
