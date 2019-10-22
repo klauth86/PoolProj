@@ -7,6 +7,8 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
 
+#include "CollisionQueryParams.h"
+#include "DrawDebugHelpers.h"
 #include "UObject/ConstructorHelpers.h"
 #include "Materials/Material.h"
 
@@ -23,6 +25,10 @@ class POOLPROJA_API AMyPawn : public APawn {
 public:
 	// Sets default values for this pawn's properties
 	AMyPawn();
+
+
+	UPROPERTY(EditAnywhere, Category = MyPawn)
+		float Sight = 500; // In Sm
 
 	UPROPERTY(EditAnywhere, Category = MyPawn)
 		float Mass = 1; // In Kg
@@ -56,6 +62,8 @@ protected:
 	void MoveForward(float Val);
 
 	void Fire();
+
+	void DrawRay();
 
 protected:
 	// Called to bind functionality to input

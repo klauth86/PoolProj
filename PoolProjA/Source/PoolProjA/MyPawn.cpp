@@ -30,14 +30,13 @@ AMyPawn::AMyPawn() {
 
 	MeshComponent->BodyInstance.bUseCCD = true;
 	MeshComponent->SetCollisionProfileName(TEXT("BlockAll"));
-	MeshComponent->AlwaysLoadOnClient = true;
 
 	MovementComponent = CreateDefaultSubobject<UMyPawnMovementComponent>("MovementComponent");
 
 	// Create a camera boom (pulls in towards the player if there is a collision)
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
 	CameraBoom->SetupAttachment(RootComponent);
-	CameraBoom->TargetArmLength = 600.0f; // The camera follows at this distance behind the character
+	CameraBoom->TargetArmLength = 800.0f; // The camera follows at this distance behind the character
 	CameraBoom->SetRelativeRotation(FRotator(-30, 0, 0));
 	CameraBoom->bUsePawnControlRotation = true; // Rotate the arm based on the controller
 	CameraBoom->bInheritPitch = false;
@@ -62,6 +61,9 @@ void AMyPawn::MoveForward(float Value) {
 		// add movement in that direction
 		AddMovementInput(GetActorForwardVector(), Value);
 	}
+	else {
+		DrawRay();
+	}
 }
 
 void AMyPawn::Fire() {
@@ -76,4 +78,12 @@ void AMyPawn::Fire() {
 		MeshComponent->SetMobility(EComponentMobility::Type::Movable);
 		SetActorRotation(FRotator::ZeroRotator);
 	}
+}
+
+void AMyPawn::DrawRay() {
+	auto location = this->GetActorLocation();
+	auto forward = this->GetActorForwardVector();
+
+	DrawDebugLine(GetWorld(), location, location + forward * Sight,
+		FColor(255, 0, 0), false, 0.01f, 0.f, 1.f);
 }
