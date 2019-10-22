@@ -13,12 +13,15 @@ AMyPawn::AMyPawn() {
 	bReplicates = true;
 	NetPriority = 3.0f;
 
+	bCollideWhenPlacing = false;
+	SpawnCollisionHandlingMethod = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
 	bUseControllerRotationYaw = true;
 
 	RootComponent = MeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MeshComponent"));
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> meshAsset(TEXT("StaticMesh'/Game/Models/Sphere.Sphere'"));
 	MeshComponent->SetStaticMesh(meshAsset.Object);
-	static ConstructorHelpers::FObjectFinder<UMaterial> matAsset(TEXT("Material'/Game/Models/Player_MAT.Player_MAT'"));
+	static ConstructorHelpers::FObjectFinder<UMaterial> matAsset(TEXT("Material'/Game/Models/BaseColorMAT_Player.BaseColorMAT_Player'"));
 	MeshComponent->SetMaterial(0, matAsset.Object);
 
 	MeshComponent->SetMassOverrideInKg("", Mass, true);
@@ -64,7 +67,7 @@ void AMyPawn::InitPlayerCameraManager() {
 	//PC->PlayerCameraManager->FreeCamDistance = 600;
 
 	//auto cache = PC->PlayerCameraManager->CameraCache;
-	//cache.POV.Rotation = FRotator(0, 30, 0);
+	//cache.POV.Rotation = FRotator(0, -30, 0);
 	//PC->PlayerCameraManager->CameraCache = cache;
 }
 

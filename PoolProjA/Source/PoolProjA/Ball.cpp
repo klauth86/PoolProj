@@ -16,7 +16,7 @@ ABall::ABall() {
 	RootComponent = Mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> meshAsset(TEXT("StaticMesh'/Game/Models/Sphere.Sphere'"));
 	Mesh->SetStaticMesh(meshAsset.Object);
-	static ConstructorHelpers::FObjectFinder<UMaterialInstance> matAsset(TEXT("Material'/Game/Models/Ball_MAT.Ball_MAT'"));
+	static ConstructorHelpers::FObjectFinder<UMaterialInstance> matAsset(TEXT("Material'/Game/Models/BaseColorMAT_Ball.BaseColorMAT_Ball'"));
 	Mesh->SetMaterial(0, matAsset.Object);
 
 	Mesh->SetMassOverrideInKg("", Mass, true);

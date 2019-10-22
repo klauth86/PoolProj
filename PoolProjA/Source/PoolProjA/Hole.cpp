@@ -14,7 +14,7 @@ AHole::AHole() {
 	RootComponent = Mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> meshAsset(TEXT("StaticMesh'/Game/Models/Sphere.Sphere'"));
 	Mesh->SetStaticMesh(meshAsset.Object);
-	static ConstructorHelpers::FObjectFinder<UMaterialInstance> matAsset(TEXT("Material'/Game/Models/Hole_MAT.Hole_MAT'"));
+	static ConstructorHelpers::FObjectFinder<UMaterialInstance> matAsset(TEXT("Material'/Game/Models/BaseColorMAT_Hole.BaseColorMAT_Hole'"));
 	Mesh->SetMaterial(0, matAsset.Object);
 
 	Mesh->BodyInstance.bUseCCD = true;
