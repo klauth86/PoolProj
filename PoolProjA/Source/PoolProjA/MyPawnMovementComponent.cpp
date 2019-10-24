@@ -27,22 +27,18 @@ void UMyPawnMovementComponent::TickComponent(float DeltaTime, enum ELevelTick Ti
 		return;
 	}
 
-	const AController* Controller = PawnOwner->GetController();
-	if (Controller && Controller->IsLocalController()) {
-		// apply input for local players but also for AI that's not following a navigation path at the moment
-		if (Controller->IsLocalPlayerController() == true || Controller->IsFollowingAPath() == false || bUseAccelerationForPaths) {
-			ApplyControlInputToVelocity(DeltaTime);
-		}
-		// if it's not player controller, but we do have a controller, then it's AI
-		// (that's not following a path) and we need to limit the speed
-		else if (IsExceedingMaxSpeed(MaxSpeed) == true) {
+	if (ROLE_Authority == PawnOwner->Role) {
+		auto input = ConsumeInput();
+
+		ApplyControlInputToVelocity(DeltaTime, input);
+		
+		if (IsExceedingMaxSpeed(MaxSpeed) == true) {
 			Velocity = Velocity.GetUnsafeNormal() * MaxSpeed;
 		}
 
 		LimitWorldBounds();
 		bPositionCorrected = false;
 
-		// Move actor
 		FVector Delta = Velocity * DeltaTime;
 
 		if (!Delta.IsNearlyZero(1e-6f)) {
@@ -86,8 +82,8 @@ bool UMyPawnMovementComponent::LimitWorldBounds() {
 	return false;
 }
 
-void UMyPawnMovementComponent::ApplyControlInputToVelocity(float DeltaTime) {
-	const FVector ControlAcceleration = GetPendingInputVector().GetClampedToMaxSize(1.f);
+void UMyPawnMovementComponent::ApplyControlInputToVelocity(float DeltaTime, FVector input) {
+	const FVector ControlAcceleration = input.GetClampedToMaxSize(1.f);
 
 	const float AnalogInputModifier = (ControlAcceleration.SizeSquared() > 0.f ? ControlAcceleration.Size() : 0.f);
 	const float MaxPawnSpeed = GetMaxSpeed() * AnalogInputModifier;
@@ -126,4 +122,22 @@ void UMyPawnMovementComponent::ApplyControlInputToVelocity(float DeltaTime) {
 bool UMyPawnMovementComponent::ResolvePenetrationImpl(const FVector& Adjustment, const FHitResult& Hit, const FQuat& NewRotationQuat) {
 	bPositionCorrected |= Super::ResolvePenetrationImpl(Adjustment, Hit, NewRotationQuat);
 	return bPositionCorrected;
+}
+
+void UMyPawnMovementComponent::ServerMoveForward_Implementation(FVector val) {
+	MovementInput += val;
+}
+
+bool UMyPawnMovementComponent::ServerMoveForward_Validate(FVector val) {
+	return true;
+}
+
+void UMyPawnMovementComponent::MoveForward(FVector val) {
+	ServerMoveForward(val);
+}
+
+FVector UMyPawnMovementComponent::ConsumeInput() {
+	auto result = MovementInput;
+	MovementInput = FVector::ZeroVector;
+	return result;
 }

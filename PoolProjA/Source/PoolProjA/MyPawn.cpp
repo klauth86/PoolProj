@@ -58,12 +58,7 @@ void AMyPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) {
 
 void AMyPawn::MoveForward(float Value) {
 	if (Value != 0.0f) {
-		// add movement in that direction
-		AddMovementInput(GetActorForwardVector(), Value);
-	}
-	else {
-		UE_LOG(LogTemp, Warning, TEXT("DrawRay"));
-		DrawRay();
+		MovementComponent->MoveForward(GetActorForwardVector() * Value);
 	}
 }
 
