@@ -23,9 +23,7 @@ class POOLPROJA_API AMyPawn : public APawn {
 	GENERATED_BODY()
 
 public:
-	// Sets default values for this pawn's properties
 	AMyPawn();
-
 
 	UPROPERTY(EditAnywhere, Category = MyPawn)
 		float Sight = 5000; // In Sm
@@ -41,32 +39,29 @@ public:
 		bool IsInFireMode = false; // In Kg
 
 private:
-	/** The main mesh associated with this Pawn (optional sub-object). */
+
 	UPROPERTY(Category = Character, VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 		UStaticMeshComponent* MeshComponent;
 
-	/** Movement component used for movement logic in various movement modes (walking, falling, etc), containing relevant settings and functions to control movement. */
 	UPROPERTY(Category = Character, VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 		UMyPawnMovementComponent* MovementComponent;
 
-	/** Camera boom positioning the camera behind the character */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 		class USpringArmComponent* CameraBoom;
 
-	/** Follow camera */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 		class UCameraComponent* FollowCamera;
 
 protected:
-	/** Handles moving forward/backward */
 	void MoveForward(float Val);
+
+	void MoveRight(float Val);
 
 	void Fire();
 
 	void DrawRay();
 
 protected:
-	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 public:

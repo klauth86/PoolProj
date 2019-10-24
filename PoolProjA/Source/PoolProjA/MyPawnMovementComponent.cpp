@@ -28,9 +28,11 @@ void UMyPawnMovementComponent::TickComponent(float DeltaTime, enum ELevelTick Ti
 	}
 
 	if (ROLE_Authority == PawnOwner->Role) {
-		auto input = ConsumeInput();
+		
+		auto movementInput = ConsumeMovementInput();
+		auto yawInput = ConsumeYawInput();
 
-		ApplyControlInputToVelocity(DeltaTime, input);
+		ApplyControlInputToVelocity(DeltaTime, movementInput);
 		
 		if (IsExceedingMaxSpeed(MaxSpeed) == true) {
 			Velocity = Velocity.GetUnsafeNormal() * MaxSpeed;
@@ -41,12 +43,19 @@ void UMyPawnMovementComponent::TickComponent(float DeltaTime, enum ELevelTick Ti
 
 		FVector Delta = Velocity * DeltaTime;
 
-		if (!Delta.IsNearlyZero(1e-6f)) {
+		auto tolerance = 1e-6f;
+		auto deltaIsNearlyZero = Delta.IsNearlyZero(tolerance);
+		auto yawInputIsNearlyZero = FMath::Abs(yawInput) < tolerance;
+
+		if (!deltaIsNearlyZero || !yawInputIsNearlyZero) {
+			
 			const FVector OldLocation = UpdatedComponent->GetComponentLocation();
-			const FQuat Rotation = UpdatedComponent->GetComponentQuat();
+			FRotator CurrentRotation = UpdatedComponent->GetComponentRotation();
+			if (!yawInputIsNearlyZero)
+				CurrentRotation.Yaw += yawInput;
 
 			FHitResult Hit(1.f);
-			SafeMoveUpdatedComponent(Delta, Rotation, true, Hit);
+			SafeMoveUpdatedComponent(Delta, FQuat(CurrentRotation), true, Hit);
 
 			if (Hit.IsValidBlockingHit()) {
 				HandleImpact(Hit, DeltaTime, Delta);
@@ -124,6 +133,12 @@ bool UMyPawnMovementComponent::ResolvePenetrationImpl(const FVector& Adjustment,
 	return bPositionCorrected;
 }
 
+
+// MOVE FORWARD
+void UMyPawnMovementComponent::MoveForward(FVector val) {
+	ServerMoveForward(val);
+}
+
 void UMyPawnMovementComponent::ServerMoveForward_Implementation(FVector val) {
 	MovementInput += val;
 }
@@ -132,12 +147,29 @@ bool UMyPawnMovementComponent::ServerMoveForward_Validate(FVector val) {
 	return true;
 }
 
-void UMyPawnMovementComponent::MoveForward(FVector val) {
-	ServerMoveForward(val);
-}
-
-FVector UMyPawnMovementComponent::ConsumeInput() {
+FVector UMyPawnMovementComponent::ConsumeMovementInput() {
 	auto result = MovementInput;
 	MovementInput = FVector::ZeroVector;
+	return result;
+}
+
+
+
+// YAW ROTATION
+void UMyPawnMovementComponent::MoveRight(float val) {
+	ServerMoveRight(val);
+}
+
+void UMyPawnMovementComponent::ServerMoveRight_Implementation(float val) {
+	YawInput += val;
+}
+
+bool UMyPawnMovementComponent::ServerMoveRight_Validate(float val) {
+	return true;
+}
+
+float UMyPawnMovementComponent::ConsumeYawInput() {
+	auto result = YawInput;
+	YawInput = 0;
 	return result;
 }

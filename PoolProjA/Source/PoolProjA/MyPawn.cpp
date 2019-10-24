@@ -19,7 +19,7 @@ AMyPawn::AMyPawn() {
 	bUseControllerRotationYaw = true;
 
 	RootComponent = MeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MeshComponent"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> meshAsset(TEXT("StaticMesh'/Game/Models/Sphere.Sphere'"));
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> meshAsset(TEXT("StaticMesh'/Game/Models/Cube.Cube'"));
 	MeshComponent->SetStaticMesh(meshAsset.Object);
 	static ConstructorHelpers::FObjectFinder<UMaterialInterface> matAsset(TEXT("Material'/Game/Models/BaseColorMAT_Player.BaseColorMAT_Player'"));
 	MeshComponent->SetMaterial(0, matAsset.Object);
@@ -51,7 +51,7 @@ void AMyPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
 	PlayerInputComponent->BindAxis("MoveForward", this, &AMyPawn::MoveForward);
-	PlayerInputComponent->BindAxis("MoveRight", this, &APawn::AddControllerYawInput);
+	PlayerInputComponent->BindAxis("MoveRight", this, &AMyPawn::MoveRight);
 
 	PlayerInputComponent->BindAction("Fire", EInputEvent::IE_Pressed, this, &AMyPawn::Fire);
 }
@@ -59,6 +59,16 @@ void AMyPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) {
 void AMyPawn::MoveForward(float Value) {
 	if (Value != 0.0f) {
 		MovementComponent->MoveForward(GetActorForwardVector() * Value);
+	}
+}
+
+void AMyPawn::MoveRight(float Value) {
+
+	static auto pc = Cast<APlayerController>(GetController());
+
+	if (Value != 0.0f) {
+		MovementComponent->MoveRight(Value * pc->InputYawScale);
+		AddControllerYawInput(Value);
 	}
 }
 
