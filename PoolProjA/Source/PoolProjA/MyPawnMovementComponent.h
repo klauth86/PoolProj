@@ -28,9 +28,6 @@ protected:
 
 	virtual bool ResolvePenetrationImpl(const FVector& Adjustment, const FHitResult& Hit, const FQuat& NewRotation) override;
 
-	float YawInput;
-	float ConsumeYawInput();
-
 	FVector MovementInput;
 	FVector ConsumeMovementInput();
 
@@ -38,11 +35,6 @@ protected:
 	void ServerMoveForward(FVector val);
 	void ServerMoveForward_Implementation(FVector val);
 	bool ServerMoveForward_Validate(FVector val);
-
-	UFUNCTION(Server, Reliable, WithValidation)
-	void ServerMoveRight(float val);
-	void ServerMoveRight_Implementation(float val);
-	bool ServerMoveRight_Validate(float val);
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = FloatingPawnMovement)
@@ -58,8 +50,6 @@ public:
 		float TurningBoost;
 
 	void MoveForward(FVector val);
-
-	void MoveRight(float val);
 
 protected:
 

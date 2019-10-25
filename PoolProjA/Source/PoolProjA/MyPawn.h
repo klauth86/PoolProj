@@ -2,11 +2,12 @@
 
 #pragma once
 
+#include "CoreMinimal.h"
+
+#include "GameFramework/Pawn.h"
 #include "MyPawnMovementComponent.h"
 
-#include "CoreMinimal.h"
-#include "GameFramework/Pawn.h"
-
+#include "Net/UnrealNetwork.h"
 #include "CollisionQueryParams.h"
 #include "DrawDebugHelpers.h"
 #include "UObject/ConstructorHelpers.h"
@@ -24,6 +25,8 @@ class POOLPROJA_API AMyPawn : public APawn {
 
 public:
 	AMyPawn();
+
+	void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 	UPROPERTY(EditAnywhere, Category = MyPawn)
 		float Sight = 5000; // In Sm
@@ -57,12 +60,26 @@ protected:
 
 	void MoveRight(float Val);
 
+	UFUNCTION(Server, Reliable, WithValidation)
 	void Fire();
+	void Fire_Implementation();
+	bool Fire_Validate();
 
 	void DrawRay();
 
 protected:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+	UPROPERTY(ReplicatedUsing=OnRep_SetYaw)
+	float Yaw;
+
+	UFUNCTION(Server, Reliable, WithValidation)
+		void ServerSetYaw(float value);
+	void ServerSetYaw_Implementation(float value);
+	bool ServerSetYaw_Validate(float value);
+
+	UFUNCTION()
+	void OnRep_SetYaw();
 
 public:
 	FORCEINLINE class UStaticMeshComponent* GetMeshComponent() const { return MeshComponent; }

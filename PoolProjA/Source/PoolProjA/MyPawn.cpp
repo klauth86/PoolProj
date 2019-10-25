@@ -16,8 +16,6 @@ AMyPawn::AMyPawn() {
 	bCollideWhenPlacing = false;
 	SpawnCollisionHandlingMethod = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 
-	bUseControllerRotationYaw = true;
-
 	RootComponent = MeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MeshComponent"));
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> meshAsset(TEXT("StaticMesh'/Game/Models/Cube.Cube'"));
 	MeshComponent->SetStaticMesh(meshAsset.Object);
@@ -63,16 +61,13 @@ void AMyPawn::MoveForward(float Value) {
 }
 
 void AMyPawn::MoveRight(float Value) {
-
-	static auto pc = Cast<APlayerController>(GetController());
-
 	if (Value != 0.0f) {
-		MovementComponent->MoveRight(Value * pc->InputYawScale);
 		AddControllerYawInput(Value);
+		ServerSetYaw(GetControlRotation().Yaw);
 	}
 }
 
-void AMyPawn::Fire() {
+void AMyPawn::Fire_Implementation() {
 	if (!IsInFireMode) {
 		MeshComponent->AddForce(ForceAmount * GetActorForwardVector());
 		IsInFireMode = true;
@@ -86,10 +81,35 @@ void AMyPawn::Fire() {
 	}
 }
 
+bool AMyPawn::Fire_Validate() {
+	return true;
+}
+
 void AMyPawn::DrawRay() {
 	auto location = this->GetActorLocation();
 	auto forward = this->GetActorForwardVector();
 
 	DrawDebugLine(GetWorld(), location, location + forward * Sight,
 		FColor(255, 0, 0), false, 0.5f, 0.f, 3.f);
+}
+
+void AMyPawn::ServerSetYaw_Implementation(float value) {
+	Yaw = value;
+	OnRep_SetYaw();
+}
+
+bool AMyPawn::ServerSetYaw_Validate(float value) {
+	return true;
+}
+
+void AMyPawn::OnRep_SetYaw() {
+	auto rotation = GetActorRotation();
+	rotation.Yaw = Yaw;
+	UE_LOG(LogTemp, Warning, TEXT("%s - %f"), (Role == ROLE_Authority ? "S" : "C"), GetControlRotation().Yaw)
+	SetActorRotation(rotation);
+}
+
+void AMyPawn::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(AMyPawn, Yaw);
 }
