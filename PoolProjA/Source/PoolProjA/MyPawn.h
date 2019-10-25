@@ -19,6 +19,9 @@
 
 #include "MyPawn.generated.h"
 
+UENUM()
+enum class MyPawnState { ACTIVE, LAUNCHED, DAMPING };
+
 UCLASS()
 class POOLPROJA_API AMyPawn : public APawn {
 	GENERATED_BODY()
@@ -39,7 +42,7 @@ public:
 	// https://billiards.colostate.edu/technical_proofs/new/TP_B-20.pdf
 
 	UPROPERTY(VisibleAnywhere, Category = MyPawn)
-		bool IsInFireMode = false; // In Kg
+		MyPawnState State = MyPawnState::ACTIVE;
 
 private:
 
@@ -67,8 +70,16 @@ protected:
 
 	void DrawRay();
 
+	void StartDamping();
+	void StopDamping();
+
+	void Tick(float DeltaTime);
+
 protected:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+	UPROPERTY(Replicated)
+		bool ResetRotation;
 
 	UPROPERTY(ReplicatedUsing=OnRep_SetYaw)
 	float Yaw;
@@ -77,6 +88,8 @@ protected:
 		void ServerSetYaw(float value);
 	void ServerSetYaw_Implementation(float value);
 	bool ServerSetYaw_Validate(float value);
+
+	void SetYaw();
 
 	UFUNCTION()
 	void OnRep_SetYaw();

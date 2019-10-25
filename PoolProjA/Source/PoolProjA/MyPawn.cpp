@@ -67,23 +67,24 @@ void AMyPawn::MoveRight(float Value) {
 	}
 }
 
-void AMyPawn::Fire_Implementation() {
-	if (!IsInFireMode) {
-		MeshComponent->AddForce(ForceAmount * GetActorForwardVector());
-		IsInFireMode = true;
-	}
-	else {
-		MeshComponent->SetMobility(EComponentMobility::Type::Static);
-		IsInFireMode = false;
 
-		MeshComponent->SetMobility(EComponentMobility::Type::Movable);
-		SetActorRotation(FRotator::ZeroRotator);
+
+void AMyPawn::Fire_Implementation() {
+	if (State == MyPawnState::ACTIVE) {
+		State = MyPawnState::LAUNCHED;
+		MeshComponent->AddForce(ForceAmount * GetActorForwardVector());
+	}
+	else if (State == MyPawnState::LAUNCHED) {
+		State = MyPawnState::DAMPING;
+		StartDamping();
 	}
 }
 
 bool AMyPawn::Fire_Validate() {
 	return true;
 }
+
+
 
 void AMyPawn::DrawRay() {
 	auto location = this->GetActorLocation();
@@ -93,9 +94,11 @@ void AMyPawn::DrawRay() {
 		FColor(255, 0, 0), false, 0.5f, 0.f, 3.f);
 }
 
+
+
 void AMyPawn::ServerSetYaw_Implementation(float value) {
 	Yaw = value;
-	OnRep_SetYaw();
+	SetYaw();
 }
 
 bool AMyPawn::ServerSetYaw_Validate(float value) {
@@ -103,13 +106,53 @@ bool AMyPawn::ServerSetYaw_Validate(float value) {
 }
 
 void AMyPawn::OnRep_SetYaw() {
-	auto rotation = GetActorRotation();
+	SetYaw();
+}
+
+void AMyPawn::SetYaw() {
+	auto rotation = ResetRotation ? FRotator::ZeroRotator : GetActorRotation();
 	rotation.Yaw = Yaw;
-	UE_LOG(LogTemp, Warning, TEXT("%s - %f"), (Role == ROLE_Authority ? "S" : "C"), GetControlRotation().Yaw)
 	SetActorRotation(rotation);
 }
 
 void AMyPawn::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	DOREPLIFETIME(AMyPawn, Yaw);
+	DOREPLIFETIME(AMyPawn, ResetRotation);
+}
+
+void AMyPawn::Tick(float DeltaTime) {
+	Super::Tick(DeltaTime);
+
+	auto tolerance = 1e-6f;
+
+	if (Role == ROLE_Authority) {
+		if (State == MyPawnState::DAMPING && FMath::Abs(MeshComponent->GetPhysicsLinearVelocity().SizeSquared()) < tolerance) {
+			State = MyPawnState::ACTIVE;
+			StopDamping();
+		}
+	}
+}
+
+void AMyPawn::StartDamping() {
+	auto body = MeshComponent->BodyInstance;
+	body.LinearDamping *= 1000000;
+	body.AngularDamping *= 1000000;
+	body.UpdateDampingProperties();
+}
+
+void AMyPawn::StopDamping() {
+	MeshComponent->SetPhysicsLinearVelocity(FVector::ZeroVector);
+	MeshComponent->SetPhysicsAngularVelocity(FVector::ZeroVector);
+	
+	auto body = MeshComponent->BodyInstance;
+	body.LinearDamping /= 1000000;
+	body.AngularDamping /= 1000000;
+	body.UpdateDampingProperties();
+
+	UE_LOG(LogTemp, Warning, TEXT("StopDamping"));
+
+	ResetRotation = true;
+	Yaw = Yaw;
+	SetYaw();
 }
