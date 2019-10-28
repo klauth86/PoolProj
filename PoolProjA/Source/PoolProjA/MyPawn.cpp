@@ -55,13 +55,13 @@ void AMyPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) {
 }
 
 void AMyPawn::MoveForward(float Value) {
-	if (Value != 0.0f) {
+	if (Value != 0.0f && State == MyPawnState::ACTIVE) {
 		MovementComponent->MoveForward(GetActorForwardVector() * Value);
 	}
 }
 
 void AMyPawn::MoveRight(float Value) {
-	if (Value != 0.0f) {
+	if (Value != 0.0f && State == MyPawnState::ACTIVE) {
 		AddControllerYawInput(Value);
 		ServerSetYaw(GetControlRotation().Yaw);
 	}
@@ -119,6 +119,7 @@ void AMyPawn::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeP
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	DOREPLIFETIME(AMyPawn, Yaw);
 	DOREPLIFETIME(AMyPawn, ResetRotation);
+	DOREPLIFETIME(AMyPawn, State);
 }
 
 void AMyPawn::Tick(float DeltaTime) {

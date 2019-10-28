@@ -41,9 +41,6 @@ public:
 		float ForceAmount = 760000; // IN Newtons
 	// https://billiards.colostate.edu/technical_proofs/new/TP_B-20.pdf
 
-	UPROPERTY(VisibleAnywhere, Category = MyPawn)
-		MyPawnState State = MyPawnState::ACTIVE;
-
 private:
 
 	UPROPERTY(Category = Character, VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
@@ -80,6 +77,9 @@ protected:
 
 	UPROPERTY(Replicated)
 		bool ResetRotation;
+
+	UPROPERTY(Replicated)
+		MyPawnState State = MyPawnState::ACTIVE;
 
 	UPROPERTY(ReplicatedUsing=OnRep_SetYaw)
 	float Yaw;
