@@ -13,6 +13,7 @@
 #include "UObject/ConstructorHelpers.h"
 #include "Materials/Material.h"
 
+#include "Animation/AnimBlueprint.h"
 #include "Engine/SkeletalMesh.h"
 #include "Components/PrimitiveComponent.h"
 #include "GameFramework/SpringArmComponent.h"

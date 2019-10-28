@@ -19,7 +19,7 @@ AMyPawn::AMyPawn() {
 	RootComponent = CollisionComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("CollisionComponent"));
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> meshAsset(TEXT("StaticMesh'/Game/Models/EyeBall/CollisionMesh.CollisionMesh'"));
 	CollisionComponent->SetStaticMesh(meshAsset.Object);
-	//CollisionComponent->SetVisibility(false);
+	CollisionComponent->SetVisibility(false);
 
 	CollisionComponent->SetMassOverrideInKg("", Mass, true);
 	CollisionComponent->SetSimulatePhysics(true);
@@ -32,16 +32,19 @@ AMyPawn::AMyPawn() {
 	static ConstructorHelpers::FObjectFinder<USkeletalMesh> smeshAsset(TEXT("SkeletalMesh'/Game/Models/EyeBall/EyeBall.EyeBall'"));
 	MeshComponent->SetSkeletalMesh(smeshAsset.Object);
 	MeshComponent->SetupAttachment(RootComponent);
+	static ConstructorHelpers::FObjectFinder<UAnimBlueprint> smeshAnimBP(TEXT("AnimBlueprint'/Game/Models/EyeBall/EyeBall_Anim_BP.EyeBall_Anim_BP'"));
+	MeshComponent->SetAnimInstanceClass(smeshAnimBP.Object->GeneratedClass);
 
 	MovementComponent = CreateDefaultSubobject<UMyPawnMovementComponent>("MovementComponent");
 
 	// Create a camera boom (pulls in towards the player if there is a collision)
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
 	CameraBoom->SetupAttachment(RootComponent);
-	CameraBoom->TargetArmLength = 800.0f; // The camera follows at this distance behind the character
-	CameraBoom->SetRelativeRotation(FRotator(-30, 0, 0));
+	CameraBoom->TargetArmLength = 50.0f; // The camera follows at this distance behind the character
+	CameraBoom->SetRelativeRotation(FRotator(-10, 0, 0));
 	CameraBoom->bUsePawnControlRotation = true; // Rotate the arm based on the controller
 	CameraBoom->bInheritPitch = false;
+	CameraBoom->bDoCollisionTest = false;
 
 	// Create a follow camera
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
