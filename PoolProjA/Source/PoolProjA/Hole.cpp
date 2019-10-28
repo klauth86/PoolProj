@@ -30,7 +30,12 @@ AHole::AHole() {
 void AHole::CallOnActorBeginOverlap(AActor* actor, AActor* otherActor) {
 	auto ball = Cast<ABall>(otherActor);
 	if (ball) {
-		ball->Destroy();
+		ball->Hit();
+		if (MyOwner)
+			MyOwner->UpdateStats();
+
+
+
 		if (GEngine)
 			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Goal!!!"));
 	}

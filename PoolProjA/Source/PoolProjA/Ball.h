@@ -21,8 +21,14 @@ public:
 	UPROPERTY(EditAnywhere, Category = MyPawn)
 		float Mass = 1;
 
+	void Hit();
 private:
 	/** The main skeletal mesh associated with this Character (optional sub-object). */
 	UPROPERTY(Category = Character, VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 		UStaticMeshComponent* Mesh;
+
+protected:
+	static int instanceCount;
+public:
+	static int InstanceCount() { return instanceCount; };
 };

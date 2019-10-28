@@ -4,6 +4,8 @@
 
 #include "Ball.h"
 
+int ABall::instanceCount = 0;
+
 // Sets default values
 ABall::ABall() {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
@@ -25,4 +27,11 @@ ABall::ABall() {
 
 	Mesh->BodyInstance.bUseCCD = true;
 	Mesh->SetCollisionProfileName(TEXT("BlockAll"));
+
+	instanceCount++;
+}
+
+void ABall::Hit() {
+	instanceCount--;
+	Destroy();
 }

@@ -33,6 +33,8 @@ public:
 
 	void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
+	void UpdateStats();
+
 	UPROPERTY(EditAnywhere, Category = MyPawn)
 		float Sight = 5000; // In Sm
 

@@ -3,6 +3,7 @@
 #pragma once
 
 #include "MyPawn.h"
+#include "Kismet/GameplayStatics.h"
 
 // Sets default values
 AMyPawn::AMyPawn() {
@@ -55,10 +56,20 @@ AMyPawn::AMyPawn() {
 void AMyPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
-	PlayerInputComponent->BindAxis("MoveForward", this, &AMyPawn::MoveForward);
-	PlayerInputComponent->BindAxis("MoveRight", this, &AMyPawn::MoveRight);
+	auto controller = Cast<APlayerController>(GetController());
+	auto id = UGameplayStatics::GetPlayerControllerID(controller);
+	if (id == 0) {
+		PlayerInputComponent->BindAxis("MoveForward", this, &AMyPawn::MoveForward);
+		PlayerInputComponent->BindAxis("MoveRight", this, &AMyPawn::MoveRight);
 
-	PlayerInputComponent->BindAction("Fire", EInputEvent::IE_Pressed, this, &AMyPawn::Fire);
+		PlayerInputComponent->BindAction("Fire", EInputEvent::IE_Pressed, this, &AMyPawn::Fire);
+	}
+	else {
+		PlayerInputComponent->BindAxis("MoveForward2", this, &AMyPawn::MoveForward);
+		PlayerInputComponent->BindAxis("MoveRight2", this, &AMyPawn::MoveRight);
+
+		PlayerInputComponent->BindAction("Fire2", EInputEvent::IE_Pressed, this, &AMyPawn::Fire);
+	}
 }
 
 void AMyPawn::MoveForward(float Value) {
@@ -73,8 +84,6 @@ void AMyPawn::MoveRight(float Value) {
 		ServerSetYaw(GetControlRotation().Yaw);
 	}
 }
-
-
 
 void AMyPawn::Fire_Implementation() {
 	if (State == MyPawnState::ACTIVE) {
@@ -163,4 +172,8 @@ void AMyPawn::StopDamping() {
 	ResetRotation = true;
 	Yaw = Yaw;
 	SetYaw();
+}
+
+void AMyPawn::UpdateStats() {
+
 }

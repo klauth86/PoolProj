@@ -5,6 +5,8 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 
+#include "MyPawn.h"
+
 #include "UObject/ConstructorHelpers.h"
 #include "Materials/Material.h"
 
@@ -17,6 +19,9 @@ class POOLPROJA_API AHole : public AActor {
 public:
 	// Sets default values for this actor's properties
 	AHole();
+
+	UPROPERTY(Category = MyOwner, EditAnywhere)
+		AMyPawn* MyOwner;
 
 private:
 	/** The main skeletal mesh associated with this Character (optional sub-object). */

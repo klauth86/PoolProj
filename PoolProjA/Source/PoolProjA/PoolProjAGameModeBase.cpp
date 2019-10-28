@@ -4,9 +4,19 @@
 
 #include "PoolProjAGameModeBase.h"
 #include "MyPawn.h"
+#include "Kismet/GameplayStatics.h"
 
 APoolProjAGameModeBase::APoolProjAGameModeBase() {
 	DefaultPawnClass = AMyPawn::StaticClass();
 }
+
+void APoolProjAGameModeBase::BeginPlay() {
+	Super::BeginPlay();
+	auto playerCount = 1;
+	for (size_t i = 0; i < playerCount; i++) {
+		UGameplayStatics::CreatePlayer(this);
+	}
+};
+
 
 

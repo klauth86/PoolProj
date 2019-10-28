@@ -16,4 +16,7 @@ class POOLPROJA_API APoolProjAGameModeBase : public AGameModeBase
 
 public:	
 	APoolProjAGameModeBase();
+
+protected:
+	void BeginPlay() override;
 };
