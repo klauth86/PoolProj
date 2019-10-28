@@ -16,18 +16,22 @@ AMyPawn::AMyPawn() {
 	bCollideWhenPlacing = false;
 	SpawnCollisionHandlingMethod = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 
-	RootComponent = MeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MeshComponent"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> meshAsset(TEXT("StaticMesh'/Game/Models/Cube.Cube'"));
-	MeshComponent->SetStaticMesh(meshAsset.Object);
-	static ConstructorHelpers::FObjectFinder<UMaterialInterface> matAsset(TEXT("Material'/Game/Models/BaseColorMAT_Player.BaseColorMAT_Player'"));
-	MeshComponent->SetMaterial(0, matAsset.Object);
+	RootComponent = CollisionComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("CollisionComponent"));
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> meshAsset(TEXT("StaticMesh'/Game/Models/EyeBall/CollisionMesh.CollisionMesh'"));
+	CollisionComponent->SetStaticMesh(meshAsset.Object);
+	//CollisionComponent->SetVisibility(false);
 
-	MeshComponent->SetMassOverrideInKg("", Mass, true);
-	MeshComponent->SetSimulatePhysics(true);
-	MeshComponent->SetNotifyRigidBodyCollision(true);
+	CollisionComponent->SetMassOverrideInKg("", Mass, true);
+	CollisionComponent->SetSimulatePhysics(true);
+	CollisionComponent->SetNotifyRigidBodyCollision(true);
 
-	MeshComponent->BodyInstance.bUseCCD = true;
-	MeshComponent->SetCollisionProfileName(TEXT("BlockAll"));
+	CollisionComponent->BodyInstance.bUseCCD = true;
+	CollisionComponent->SetCollisionProfileName(TEXT("BlockAll"));
+
+	MeshComponent = CreateDefaultSubobject<USkeletalMeshComponent>("MeshComponent");
+	static ConstructorHelpers::FObjectFinder<USkeletalMesh> smeshAsset(TEXT("SkeletalMesh'/Game/Models/EyeBall/EyeBall.EyeBall'"));
+	MeshComponent->SetSkeletalMesh(smeshAsset.Object);
+	MeshComponent->SetupAttachment(RootComponent);
 
 	MovementComponent = CreateDefaultSubobject<UMyPawnMovementComponent>("MovementComponent");
 
@@ -72,7 +76,7 @@ void AMyPawn::MoveRight(float Value) {
 void AMyPawn::Fire_Implementation() {
 	if (State == MyPawnState::ACTIVE) {
 		State = MyPawnState::LAUNCHED;
-		MeshComponent->AddForce(ForceAmount * GetActorForwardVector());
+		CollisionComponent->AddForce(ForceAmount * GetActorForwardVector());
 	}
 	else if (State == MyPawnState::LAUNCHED) {
 		State = MyPawnState::DAMPING;
@@ -128,7 +132,7 @@ void AMyPawn::Tick(float DeltaTime) {
 	auto tolerance = 1e-6f;
 
 	if (Role == ROLE_Authority) {
-		if (State == MyPawnState::DAMPING && FMath::Abs(MeshComponent->GetPhysicsLinearVelocity().SizeSquared()) < tolerance) {
+		if (State == MyPawnState::DAMPING && FMath::Abs(CollisionComponent->GetPhysicsLinearVelocity().SizeSquared()) < tolerance) {
 			State = MyPawnState::ACTIVE;
 			StopDamping();
 		}
@@ -136,17 +140,17 @@ void AMyPawn::Tick(float DeltaTime) {
 }
 
 void AMyPawn::StartDamping() {
-	auto body = MeshComponent->BodyInstance;
+	auto body = CollisionComponent->BodyInstance;
 	body.LinearDamping *= 1000000;
 	body.AngularDamping *= 1000000;
 	body.UpdateDampingProperties();
 }
 
 void AMyPawn::StopDamping() {
-	MeshComponent->SetPhysicsLinearVelocity(FVector::ZeroVector);
-	MeshComponent->SetPhysicsAngularVelocity(FVector::ZeroVector);
+	CollisionComponent->SetPhysicsLinearVelocity(FVector::ZeroVector);
+	CollisionComponent->SetPhysicsAngularVelocity(FVector::ZeroVector);
 	
-	auto body = MeshComponent->BodyInstance;
+	auto body = CollisionComponent->BodyInstance;
 	body.LinearDamping /= 1000000;
 	body.AngularDamping /= 1000000;
 	body.UpdateDampingProperties();

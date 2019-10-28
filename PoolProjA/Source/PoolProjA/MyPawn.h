@@ -13,6 +13,7 @@
 #include "UObject/ConstructorHelpers.h"
 #include "Materials/Material.h"
 
+#include "Engine/SkeletalMesh.h"
 #include "Components/PrimitiveComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
@@ -42,9 +43,11 @@ public:
 	// https://billiards.colostate.edu/technical_proofs/new/TP_B-20.pdf
 
 private:
+	UPROPERTY(Category = Character, VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+		UStaticMeshComponent* CollisionComponent;
 
 	UPROPERTY(Category = Character, VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-		UStaticMeshComponent* MeshComponent;
+		USkeletalMeshComponent* MeshComponent;
 
 	UPROPERTY(Category = Character, VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 		UMyPawnMovementComponent* MovementComponent;
@@ -95,7 +98,9 @@ protected:
 	void OnRep_SetYaw();
 
 public:
-	FORCEINLINE class UStaticMeshComponent* GetMeshComponent() const { return MeshComponent; }
+	FORCEINLINE class UStaticMeshComponent* GetCollisionComponent() const { return CollisionComponent; }
+
+	FORCEINLINE class USkeletalMeshComponent* GetMeshComponent() const { return MeshComponent; }
 
 	FORCEINLINE virtual UPawnMovementComponent* GetMovementComponent() const override { return MovementComponent; };
 
