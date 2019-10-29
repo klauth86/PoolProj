@@ -8,7 +8,7 @@
 #include "UObject/ConstructorHelpers.h"
 #include "Materials/Material.h"
 
-#include "MyPawn.h"
+#include "PoolProjAGameModeBase.h"
 #include "Ball.h"
 
 #include "Hole.generated.h"
@@ -22,7 +22,7 @@ public:
 	AHole();
 
 	UPROPERTY(Category = MyOwner, EditAnywhere)
-		AMyPawn* MyOwner;
+		int MyOwnerControllerId = -1;
 
 private:
 	/** The main skeletal mesh associated with this Character (optional sub-object). */

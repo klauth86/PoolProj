@@ -31,10 +31,24 @@ void AHole::CallOnActorBeginOverlap(AActor* actor, AActor* otherActor) {
 		
 		ball->Hit();
 
-		if (MyOwner)
-			MyOwner->UpdateStats();
+		auto world = GetWorld();
+		if (world) {
 
-		if (GEngine)
-			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Goal!!!"));
+			auto gameMode =
+				UGameplayStatics::GetGameMode(world);
+			auto myGameMode =
+				Cast<APoolProjAGameModeBase>(gameMode);
+
+			if (myGameMode != nullptr) {
+					if (MyOwnerControllerId == 0) {
+						myGameMode->Player2Score++;
+					}
+					else {
+						myGameMode->Player1Score++;
+					}
+
+				myGameMode->CheckWinCondition();
+			}
+		}
 	}
 }

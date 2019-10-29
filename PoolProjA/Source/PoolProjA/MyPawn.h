@@ -33,8 +33,6 @@ public:
 
 	void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
-	void UpdateStats();
-
 	UPROPERTY(EditAnywhere, Category = MyPawn)
 		float Sight = 5000; // In Sm
 
@@ -44,7 +42,6 @@ public:
 	UPROPERTY(EditAnywhere, Category = MyPawn)
 		float ForceAmount = 760000; // IN Newtons
 	// https://billiards.colostate.edu/technical_proofs/new/TP_B-20.pdf
-
 private:
 	UPROPERTY(Category = Character, VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 		UStaticMeshComponent* CollisionComponent;
@@ -61,6 +58,7 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 		class UCameraComponent* FollowCamera;
 
+		int ControllerId;
 protected:
 	void MoveForward(float Val);
 
@@ -110,4 +108,6 @@ public:
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
+
+	FORCEINLINE int GetControllerId() const { return ControllerId; }
 };

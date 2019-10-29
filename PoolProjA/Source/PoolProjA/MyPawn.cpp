@@ -40,7 +40,7 @@ AMyPawn::AMyPawn() {
 	// Create a camera boom (pulls in towards the player if there is a collision)
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
 	CameraBoom->SetupAttachment(RootComponent);
-	CameraBoom->TargetArmLength = 50.0f; // The camera follows at this distance behind the character
+	CameraBoom->TargetArmLength = 20.0f; // The camera follows at this distance behind the character
 	CameraBoom->SetRelativeRotation(FRotator(-10, 0, 0));
 	CameraBoom->bUsePawnControlRotation = true; // Rotate the arm based on the controller
 	CameraBoom->bInheritPitch = false;
@@ -54,11 +54,13 @@ AMyPawn::AMyPawn() {
 
 void AMyPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
-
+	
 	auto controller = Cast<APlayerController>(GetController());
-	auto id = UGameplayStatics::GetPlayerControllerID(controller);
-	UE_LOG(LogTemp, Warning, TEXT("%d ID"), id);
-	if (id == 0) {
+	ControllerId = UGameplayStatics::GetPlayerControllerID(controller);
+
+	UE_LOG(LogTemp, Warning, TEXT("%d ID"), ControllerId);
+
+	if (ControllerId == 0) {
 		PlayerInputComponent->BindAxis("MoveForward", this, &AMyPawn::MoveForward);
 		PlayerInputComponent->BindAxis("MoveRight", this, &AMyPawn::MoveRight);
 
@@ -172,8 +174,4 @@ void AMyPawn::StopDamping() {
 	ResetRotation = true;
 	Yaw = Yaw;
 	SetYaw();
-}
-
-void AMyPawn::UpdateStats() {
-
 }

@@ -7,8 +7,6 @@
 #include "UObject/ConstructorHelpers.h"
 #include "Materials/Material.h"
 
-#include "PoolProjAGameModeBase.h"
-
 #include "Ball.generated.h"
 
 UCLASS()

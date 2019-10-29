@@ -34,15 +34,4 @@ ABall::ABall() {
 void ABall::Hit() {
 	instanceCount--;
 	Destroy();
-
-	auto world = GetWorld();
-	if (world) {
-		auto gameMode =
-			UGameplayStatics::GetGameMode(world);
-		auto myGameMode =
-			Cast<APoolProjAGameModeBase>(gameMode);
-		if (myGameMode != nullptr) {
-			myGameMode->CheckWinCondition();
-		}
-	}
 }
