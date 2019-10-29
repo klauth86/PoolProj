@@ -3,7 +3,6 @@
 #pragma once
 
 #include "MyPawn.h"
-#include "Kismet/GameplayStatics.h"
 
 // Sets default values
 AMyPawn::AMyPawn() {
@@ -58,6 +57,7 @@ void AMyPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) {
 
 	auto controller = Cast<APlayerController>(GetController());
 	auto id = UGameplayStatics::GetPlayerControllerID(controller);
+	UE_LOG(LogTemp, Warning, TEXT("%d ID"), id);
 	if (id == 0) {
 		PlayerInputComponent->BindAxis("MoveForward", this, &AMyPawn::MoveForward);
 		PlayerInputComponent->BindAxis("MoveRight", this, &AMyPawn::MoveRight);

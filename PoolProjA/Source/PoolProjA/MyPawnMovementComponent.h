@@ -3,6 +3,10 @@
 #include "CoreMinimal.h"
 #include "UObject/ObjectMacros.h"
 #include "GameFramework/PawnMovementComponent.h"
+#include "GameFramework/Pawn.h"
+#include "GameFramework/Controller.h"
+#include "GameFramework/WorldSettings.h"
+
 #include "MyPawnMovementComponent.generated.h"
 
 /**

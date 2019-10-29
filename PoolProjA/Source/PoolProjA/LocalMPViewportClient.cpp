@@ -1,11 +1,11 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
+#pragma once
+
 #include "LocalMPViewportClient.h"
-#include "Engine.h"
 
 bool ULocalMPViewportClient::InputKey(FViewport* Viewport, int32 ControllerId, FKey Key, EInputEvent EventType, float AmountDepressed, bool bGamepad) {
 	
-	UE_LOG(LogTemp, Warning, TEXT("Player input"))
 	if (IgnoreInput() || bGamepad || Key.IsMouseButton()) {
 		return Super::InputKey(Viewport, ControllerId, Key, EventType, AmountDepressed, bGamepad);
 	}
@@ -16,7 +16,6 @@ bool ULocalMPViewportClient::InputKey(FViewport* Viewport, int32 ControllerId, F
 		bool bRetVal = false;
 		for (int32 i = 0; i < NumPlayers; i++) {
 			bRetVal = Super::InputKey(Viewport, i, Key, EventType, AmountDepressed, bGamepad) || bRetVal;
-			UE_LOG(LogTemp, Warning, TEXT("%d player input"), i)
 		}
 
 		return bRetVal;

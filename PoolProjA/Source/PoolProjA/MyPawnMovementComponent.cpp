@@ -1,9 +1,6 @@
 #pragma once
 
 #include "MyPawnMovementComponent.h"
-#include "GameFramework/Pawn.h"
-#include "GameFramework/Controller.h"
-#include "GameFramework/WorldSettings.h"
 
 UMyPawnMovementComponent::UMyPawnMovementComponent(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer) {

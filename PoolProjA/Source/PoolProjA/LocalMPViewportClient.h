@@ -4,6 +4,7 @@
 
 #include "Engine.h"
 #include "Engine/GameViewportClient.h"
+
 #include "LocalMPViewportClient.generated.h"
 
 /**

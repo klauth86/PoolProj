@@ -3,8 +3,6 @@
 #pragma once
 
 #include "PoolProjAGameModeBase.h"
-#include "MyPawn.h"
-#include "Kismet/GameplayStatics.h"
 
 APoolProjAGameModeBase::APoolProjAGameModeBase() {
 	DefaultPawnClass = AMyPawn::StaticClass();
@@ -17,6 +15,10 @@ void APoolProjAGameModeBase::BeginPlay() {
 		UGameplayStatics::CreatePlayer(this);
 	}
 };
+
+void APoolProjAGameModeBase::CheckWinCondition() {
+	UE_LOG(LogTemp, Warning, TEXT("CheckWinCondition"));
+}
 
 
 

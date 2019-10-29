@@ -15,8 +15,8 @@ ABall::ABall() {
 	bReplicateMovement = true;
 	NetPriority = 2.0f;
 
-	RootComponent = Mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> meshAsset(TEXT("StaticMesh'/Game/Models/Sphere.Sphere'"));
+	RootComponent = Mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("CollisionComponent"));
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> meshAsset(TEXT("StaticMesh'/Game/Models/EyeBall/CollisionMesh.CollisionMesh'"));
 	Mesh->SetStaticMesh(meshAsset.Object);
 	static ConstructorHelpers::FObjectFinder<UMaterialInstance> matAsset(TEXT("Material'/Game/Models/BaseColorMAT_Ball.BaseColorMAT_Ball'"));
 	Mesh->SetMaterial(0, matAsset.Object);
@@ -34,4 +34,15 @@ ABall::ABall() {
 void ABall::Hit() {
 	instanceCount--;
 	Destroy();
+
+	auto world = GetWorld();
+	if (world) {
+		auto gameMode =
+			UGameplayStatics::GetGameMode(world);
+		auto myGameMode =
+			Cast<APoolProjAGameModeBase>(gameMode);
+		if (myGameMode != nullptr) {
+			myGameMode->CheckWinCondition();
+		}
+	}
 }

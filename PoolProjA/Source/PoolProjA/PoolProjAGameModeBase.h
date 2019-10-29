@@ -4,6 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
+#include "Kismet/GameplayStatics.h"
+
+#include "MyPawn.h"
+
 #include "PoolProjAGameModeBase.generated.h"
 
 /**
@@ -15,8 +19,12 @@ class POOLPROJA_API APoolProjAGameModeBase : public AGameModeBase
 	GENERATED_BODY()
 
 public:	
+
 	APoolProjAGameModeBase();
 
+	void CheckWinCondition();
+
 protected:
+
 	void BeginPlay() override;
 };

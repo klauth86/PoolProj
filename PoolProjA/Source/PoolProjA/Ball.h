@@ -4,9 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-
 #include "UObject/ConstructorHelpers.h"
 #include "Materials/Material.h"
+
+#include "PoolProjAGameModeBase.h"
 
 #include "Ball.generated.h"
 
@@ -15,15 +16,14 @@ class POOLPROJA_API ABall : public AActor {
 	GENERATED_BODY()
 
 public:
-	// Sets default values for this actor's properties
 	ABall();
+
+	void Hit();
 
 	UPROPERTY(EditAnywhere, Category = MyPawn)
 		float Mass = 1;
 
-	void Hit();
 private:
-	/** The main skeletal mesh associated with this Character (optional sub-object). */
 	UPROPERTY(Category = Character, VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 		UStaticMeshComponent* Mesh;
 
