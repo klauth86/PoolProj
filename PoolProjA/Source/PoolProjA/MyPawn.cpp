@@ -40,8 +40,8 @@ AMyPawn::AMyPawn() {
 	// Create a camera boom (pulls in towards the player if there is a collision)
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
 	CameraBoom->SetupAttachment(RootComponent);
-	CameraBoom->TargetArmLength = 20.0f; // The camera follows at this distance behind the character
-	CameraBoom->SetRelativeRotation(FRotator(-10, 0, 0));
+	CameraBoom->TargetArmLength = 30.0f; // The camera follows at this distance behind the character
+	CameraBoom->SetRelativeRotation(FRotator(-30, 0, 0));
 	CameraBoom->bUsePawnControlRotation = true; // Rotate the arm based on the controller
 	CameraBoom->bInheritPitch = false;
 	CameraBoom->bDoCollisionTest = false;

@@ -9,8 +9,8 @@ AHole::AHole() {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	RootComponent = Mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> meshAsset(TEXT("StaticMesh'/Game/Models/Sphere.Sphere'"));
+	RootComponent = Mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("CollisionComponent"));
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> meshAsset(TEXT("StaticMesh'/Game/Models/EyeBall/CollisionMesh.CollisionMesh'"));
 	Mesh->SetStaticMesh(meshAsset.Object);
 	static ConstructorHelpers::FObjectFinder<UMaterialInstance> matAsset(TEXT("Material'/Game/Models/BaseColorMAT_Hole.BaseColorMAT_Hole'"));
 	Mesh->SetMaterial(0, matAsset.Object);
