@@ -21,8 +21,12 @@
 
 #include "MyPawn.generated.h"
 
-UENUM()
-enum class MyPawnState { ACTIVE, LAUNCHED, DAMPING };
+UENUM(BlueprintType)
+enum class MyPawnState : uint8 {
+	ACTIVE UMETA(DisplayName = "ACTIVE"),
+	LAUNCHED UMETA(DisplayName = "LAUNCHED"),
+	DAMPING UMETA(DisplayName = "DAMPING")
+};
 
 UCLASS()
 class POOLPROJA_API AMyPawn : public APawn {
@@ -42,6 +46,9 @@ public:
 	UPROPERTY(EditAnywhere, Category = MyPawn)
 		float ForceAmount = 760000; // IN Newtons
 	// https://billiards.colostate.edu/technical_proofs/new/TP_B-20.pdf
+
+	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly)
+		MyPawnState State = MyPawnState::ACTIVE;
 private:
 	UPROPERTY(Category = Character, VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 		UStaticMeshComponent* CollisionComponent;
@@ -81,9 +88,6 @@ protected:
 
 	UPROPERTY(Replicated)
 		bool ResetRotation;
-
-	UPROPERTY(Replicated)
-		MyPawnState State = MyPawnState::ACTIVE;
 
 	UPROPERTY(ReplicatedUsing=OnRep_SetYaw)
 	float Yaw;

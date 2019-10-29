@@ -4,9 +4,7 @@
 
 #include "Hole.h"
 
-// Sets default values
 AHole::AHole() {
-	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
 	RootComponent = Mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("CollisionComponent"));
@@ -51,4 +49,8 @@ void AHole::CallOnActorBeginOverlap(AActor* actor, AActor* otherActor) {
 			}
 		}
 	}
+}
+
+AHole::~AHole() {
+	this->OnActorBeginOverlap.RemoveAll(this);
 }

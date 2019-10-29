@@ -16,13 +16,6 @@ void APoolProjAGameModeBase::BeginPlay() {
 	for (size_t i = 0; i < playerCount; i++) {
 		UGameplayStatics::CreatePlayer(this);
 	}
-
-	if (GameUIWidget != nullptr) {
-		GameUIInstance = CreateWidget<UUserWidget>(GetWorld(), GameUIWidget);
-		if (GameUIInstance != nullptr) {
-			GameUIInstance->AddToViewport();
-		}
-	}
 };
 
 void APoolProjAGameModeBase::CheckWinCondition() {

@@ -8,7 +8,7 @@
 
 #include "Ball.h"
 #include "MyPawn.h"
-#include "Blueprint/UserWidget.h"
+#include "GameModeWithUI.h"
 
 #include "PoolProjAGameModeBase.generated.h"
 
@@ -16,7 +16,7 @@
  * 
  */
 UCLASS()
-class POOLPROJA_API APoolProjAGameModeBase : public AGameModeBase
+class POOLPROJA_API APoolProjAGameModeBase : public AGameModeWithUI
 {
 	GENERATED_BODY()
 
@@ -33,16 +33,8 @@ public:
 
 	UPROPERTY(BlueprintReadOnly)
 		int Player2Score;
+
 protected:
 
 	void BeginPlay() override;
-
-protected:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UI",
-		Meta = (BleprintProtected = "true"))
-		TSubclassOf<class UUserWidget> GameUIWidget;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UI",
-		Meta = (BleprintProtected = "true"))
-		class UUserWidget* GameUIInstance;
 };

@@ -18,14 +18,17 @@ class POOLPROJA_API AHole : public AActor {
 	GENERATED_BODY()
 
 public:
-	// Sets default values for this actor's properties
+
 	AHole();
 
 	UPROPERTY(Category = MyOwner, EditAnywhere)
 		int MyOwnerControllerId = -1;
+protected:
+
+	virtual ~AHole();
 
 private:
-	/** The main skeletal mesh associated with this Character (optional sub-object). */
+
 	UPROPERTY(Category = Character, VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 		UStaticMeshComponent* Mesh;
 
