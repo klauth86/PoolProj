@@ -9,6 +9,15 @@ APoolProjAGameModeBase::APoolProjAGameModeBase() {
 	ResetScore();
 }
 
+void APoolProjAGameModeBase::BeginPlay() {
+	Super::BeginPlay();
+	
+	auto playerCount = 1;
+	for (size_t i = 0; i < playerCount; i++) {
+		UGameplayStatics::CreatePlayer(this);
+	}
+};
+
 void APoolProjAGameModeBase::CheckWinCondition() {
 	auto hasWinner = FMath::Abs(Player1Score - Player2Score) > ABall::InstanceCount();
 }

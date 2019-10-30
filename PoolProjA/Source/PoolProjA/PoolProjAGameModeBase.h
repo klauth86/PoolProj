@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
+#include "Kismet/GameplayStatics.h"
 
 #include "Ball.h"
 #include "MyPawn.h"
@@ -32,4 +33,8 @@ public:
 
 	UPROPERTY(BlueprintReadOnly)
 		int Player2Score;
+
+protected:
+
+	void BeginPlay() override;
 };
