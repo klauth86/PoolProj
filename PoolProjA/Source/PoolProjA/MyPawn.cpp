@@ -93,8 +93,10 @@ void AMyPawn::Fire_Implementation() {
 		CollisionComponent->AddForce(ForceAmount * GetActorForwardVector());
 	}
 	else if (State == MyPawnState::LAUNCHED) {
-		State = MyPawnState::DAMPING;
-		StartDamping();
+		State = MyPawnState::ACTIVE;
+		CollisionComponent->SetMobility(EComponentMobility::Type::Static);
+		CollisionComponent->SetMobility(EComponentMobility::Type::Movable);
+		SetYaw();
 	}
 }
 
@@ -128,7 +130,7 @@ void AMyPawn::OnRep_SetYaw() {
 }
 
 void AMyPawn::SetYaw() {
-	auto rotation = ResetRotation ? FRotator::ZeroRotator : GetActorRotation();
+	auto rotation = FRotator::ZeroRotator;
 	rotation.Yaw = Yaw;
 	SetActorRotation(rotation);
 }
@@ -136,42 +138,5 @@ void AMyPawn::SetYaw() {
 void AMyPawn::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	DOREPLIFETIME(AMyPawn, Yaw);
-	DOREPLIFETIME(AMyPawn, ResetRotation);
 	DOREPLIFETIME(AMyPawn, State);
-}
-
-void AMyPawn::Tick(float DeltaTime) {
-	Super::Tick(DeltaTime);
-
-	auto tolerance = 1e-6f;
-
-	if (Role == ROLE_Authority) {
-		if (State == MyPawnState::DAMPING && FMath::Abs(CollisionComponent->GetPhysicsLinearVelocity().SizeSquared()) < tolerance) {
-			State = MyPawnState::ACTIVE;
-			StopDamping();
-		}
-	}
-}
-
-void AMyPawn::StartDamping() {
-	auto body = CollisionComponent->BodyInstance;
-	body.LinearDamping *= 1000000;
-	body.AngularDamping *= 1000000;
-	body.UpdateDampingProperties();
-}
-
-void AMyPawn::StopDamping() {
-	CollisionComponent->SetPhysicsLinearVelocity(FVector::ZeroVector);
-	CollisionComponent->SetPhysicsAngularVelocity(FVector::ZeroVector);
-	
-	auto body = CollisionComponent->BodyInstance;
-	body.LinearDamping /= 1000000;
-	body.AngularDamping /= 1000000;
-	body.UpdateDampingProperties();
-
-	UE_LOG(LogTemp, Warning, TEXT("StopDamping"));
-
-	ResetRotation = true;
-	Yaw = Yaw;
-	SetYaw();
 }

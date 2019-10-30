@@ -25,7 +25,7 @@ UENUM(BlueprintType)
 enum class MyPawnState : uint8 {
 	ACTIVE UMETA(DisplayName = "ACTIVE"),
 	LAUNCHED UMETA(DisplayName = "LAUNCHED"),
-	DAMPING UMETA(DisplayName = "DAMPING")
+	PENDING UMETA(DisplayName = "PENDING")
 };
 
 UCLASS()
@@ -78,16 +78,8 @@ protected:
 
 	void DrawRay();
 
-	void StartDamping();
-	void StopDamping();
-
-	void Tick(float DeltaTime);
-
 protected:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-
-	UPROPERTY(Replicated)
-		bool ResetRotation;
 
 	UPROPERTY(ReplicatedUsing=OnRep_SetYaw)
 	float Yaw;
