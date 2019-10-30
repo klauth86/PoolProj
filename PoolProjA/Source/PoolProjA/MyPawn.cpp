@@ -94,9 +94,10 @@ void AMyPawn::Fire_Implementation() {
 	}
 	else if (State == MyPawnState::LAUNCHED) {
 		State = MyPawnState::ACTIVE;
-		CollisionComponent->SetMobility(EComponentMobility::Type::Static);
-		CollisionComponent->SetMobility(EComponentMobility::Type::Movable);
+		CollisionComponent->BodyInstance.bLockRotation = 0;
+		CollisionComponent->BodyInstance.bLockTranslation = 0;
 		SetYaw();
+
 	}
 }
 

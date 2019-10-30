@@ -22,11 +22,12 @@ public:
 		float Mass = 1;
 
 private:
-	UPROPERTY(Category = Character, VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 		UStaticMeshComponent* Mesh;
 
 protected:
 	static int instanceCount;
 public:
 	static int InstanceCount() { return instanceCount; };
+
 };

@@ -21,7 +21,7 @@ public:
 
 	AHole();
 
-	UPROPERTY(Category = MyOwner, EditAnywhere)
+	UPROPERTY(Category = Hole, EditAnywhere)
 		int MyOwnerControllerId = -1;
 protected:
 
@@ -29,7 +29,7 @@ protected:
 
 private:
 
-	UPROPERTY(Category = Character, VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 		UStaticMeshComponent* Mesh;
 
 	UFUNCTION()
