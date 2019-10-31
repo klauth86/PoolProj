@@ -36,6 +36,9 @@ public:
 	UPROPERTY(BlueprintReadOnly)
 		int ActiveControllerId;
 
+	UPROPERTY(BlueprintReadOnly)
+		FName Winner;
+
 protected:
 
 	void BeginPlay() override;

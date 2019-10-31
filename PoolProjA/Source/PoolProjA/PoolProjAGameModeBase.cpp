@@ -21,6 +21,17 @@ void APoolProjAGameModeBase::BeginPlay() {
 
 void APoolProjAGameModeBase::CheckWinCondition() {
 	auto hasWinner = ABall::InstanceCount() == 0;
+	if (hasWinner) {
+
+		ActiveControllerId = -1;
+
+		if (Player1Score > Player2Score) {
+			Winner = FName("Player 1");
+		}
+		else {
+			Winner = FName("Player 2");
+		}
+	}
 }
 
 void APoolProjAGameModeBase::ResetScore() {
