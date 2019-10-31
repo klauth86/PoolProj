@@ -17,6 +17,7 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
 
+#include "CustomStaticMeshComponent.h"
 #include "MyPawnMovementComponent.h"
 
 #include "MyPawn.generated.h"
@@ -51,7 +52,7 @@ public:
 		MyPawnState State = MyPawnState::ACTIVE;
 private:
 	UPROPERTY(Category = Character, VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-		UStaticMeshComponent* CollisionComponent;
+		UCustomStaticMeshComponent* CollisionComponent;
 
 	UPROPERTY(Category = Character, VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 		USkeletalMeshComponent* MeshComponent;
@@ -78,6 +79,8 @@ protected:
 
 	void DrawRay();
 
+	void SetupBodyInstance();
+
 protected:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
@@ -95,7 +98,7 @@ protected:
 	void OnRep_SetYaw();
 
 public:
-	FORCEINLINE class UStaticMeshComponent* GetCollisionComponent() const { return CollisionComponent; }
+	FORCEINLINE class UCustomStaticMeshComponent* GetCollisionComponent() const { return CollisionComponent; }
 
 	FORCEINLINE class USkeletalMeshComponent* GetMeshComponent() const { return MeshComponent; }
 

@@ -16,17 +16,12 @@ AMyPawn::AMyPawn() {
 	bCollideWhenPlacing = false;
 	SpawnCollisionHandlingMethod = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 
-	RootComponent = CollisionComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("CollisionComponent"));
+	RootComponent = CollisionComponent = CreateDefaultSubobject<UCustomStaticMeshComponent>(TEXT("CollisionComponent"));
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> meshAsset(TEXT("StaticMesh'/Game/Models/EyeBall/CollisionMesh.CollisionMesh'"));
 	CollisionComponent->SetStaticMesh(meshAsset.Object);
 	CollisionComponent->SetVisibility(false);
 
-	CollisionComponent->SetMassOverrideInKg("", Mass, true);
-	CollisionComponent->SetSimulatePhysics(true);
-	CollisionComponent->SetNotifyRigidBodyCollision(true);
-
-	CollisionComponent->BodyInstance.bUseCCD = true;
-	CollisionComponent->SetCollisionProfileName(TEXT("BlockAll"));
+	SetupBodyInstance();
 
 	MeshComponent = CreateDefaultSubobject<USkeletalMeshComponent>("MeshComponent");
 	static ConstructorHelpers::FObjectFinder<USkeletalMesh> smeshAsset(TEXT("SkeletalMesh'/Game/Models/EyeBall/EyeBall.EyeBall'"));
@@ -50,6 +45,15 @@ AMyPawn::AMyPawn() {
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName); // Attach the camera to the end of the boom and let the boom adjust to match the controller orientation
 	FollowCamera->bUsePawnControlRotation = false; // Camera does not rotate relative to arm
+}
+
+void AMyPawn::SetupBodyInstance() {
+	CollisionComponent->SetMassOverrideInKg("", Mass, true);
+	CollisionComponent->SetSimulatePhysics(true);
+	CollisionComponent->SetNotifyRigidBodyCollision(true);
+
+	CollisionComponent->BodyInstance.bUseCCD = true;
+	CollisionComponent->SetCollisionProfileName(TEXT("BlockAll"));
 }
 
 void AMyPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) {
@@ -94,10 +98,13 @@ void AMyPawn::Fire_Implementation() {
 	}
 	else if (State == MyPawnState::LAUNCHED) {
 		State = MyPawnState::ACTIVE;
-		CollisionComponent->BodyInstance.bLockRotation = 0;
-		CollisionComponent->BodyInstance.bLockTranslation = 0;
+		CollisionComponent->DestroyPhysicsState();
 		SetYaw();
 
+		CollisionComponent->BodyInstance = FBodyInstance();
+		SetupBodyInstance();
+
+		CollisionComponent->CreatePhysicsState();
 	}
 }
 
