@@ -19,6 +19,7 @@
 
 #include "CustomStaticMeshComponent.h"
 #include "MyPawnMovementComponent.h"
+#include "PoolProjAGameModeBase.h"
 
 #include "MyPawn.generated.h"
 
@@ -66,7 +67,10 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 		class UCameraComponent* FollowCamera;
 
-		int ControllerId;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+		APoolProjAGameModeBase* GameMode;
+
+	int ControllerId;
 protected:
 	void MoveForward(float Val);
 
@@ -80,6 +84,8 @@ protected:
 	void DrawRay();
 
 	void SetupBodyInstance();
+
+	static TMap<int, AMyPawn*> Instances;
 
 protected:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
@@ -96,6 +102,8 @@ protected:
 
 	UFUNCTION()
 	void OnRep_SetYaw();
+
+	void StopMovement();
 
 public:
 	FORCEINLINE class UCustomStaticMeshComponent* GetCollisionComponent() const { return CollisionComponent; }

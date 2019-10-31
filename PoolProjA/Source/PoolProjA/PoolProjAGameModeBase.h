@@ -7,7 +7,6 @@
 #include "Kismet/GameplayStatics.h"
 
 #include "Ball.h"
-#include "MyPawn.h"
 #include "GameModeWithUI.h"
 
 #include "PoolProjAGameModeBase.generated.h"
@@ -15,7 +14,7 @@
 /**
  * 
  */
-UCLASS()
+UCLASS(Blueprintable)
 class POOLPROJA_API APoolProjAGameModeBase : public AGameModeWithUI
 {
 	GENERATED_BODY()
@@ -33,6 +32,9 @@ public:
 
 	UPROPERTY(BlueprintReadOnly)
 		int Player2Score;
+
+	UPROPERTY(BlueprintReadOnly)
+		int ActiveControllerId;
 
 protected:
 

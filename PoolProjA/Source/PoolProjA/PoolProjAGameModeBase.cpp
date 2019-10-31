@@ -3,6 +3,7 @@
 #pragma once
 
 #include "PoolProjAGameModeBase.h"
+#include "MyPawn.h"
 
 APoolProjAGameModeBase::APoolProjAGameModeBase() {
 	DefaultPawnClass = AMyPawn::StaticClass();
@@ -19,12 +20,13 @@ void APoolProjAGameModeBase::BeginPlay() {
 };
 
 void APoolProjAGameModeBase::CheckWinCondition() {
-	auto hasWinner = FMath::Abs(Player1Score - Player2Score) > ABall::InstanceCount();
+	auto hasWinner = ABall::InstanceCount() == 0;
 }
 
 void APoolProjAGameModeBase::ResetScore() {
 	Player1Score = 0;
 	Player2Score = 0;
+	ActiveControllerId = 0;
 }
 
 

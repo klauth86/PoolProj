@@ -4,6 +4,8 @@
 
 #include "MyPawn.h"
 
+TMap<int, AMyPawn*> AMyPawn::Instances = TMap<int, AMyPawn*>();
+
 // Sets default values
 AMyPawn::AMyPawn() {
 	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
@@ -61,51 +63,62 @@ void AMyPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) {
 	
 	auto controller = Cast<APlayerController>(GetController());
 	ControllerId = UGameplayStatics::GetPlayerControllerID(controller);
+	Instances.Add(ControllerId, this);
 
-	UE_LOG(LogTemp, Warning, TEXT("%d ID"), ControllerId);
+	auto gameMode = Cast<APoolProjAGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
+	if (gameMode)
+		GameMode = gameMode;
 
 	if (ControllerId == 0) {
 		PlayerInputComponent->BindAxis("MoveForward", this, &AMyPawn::MoveForward);
 		PlayerInputComponent->BindAxis("MoveRight", this, &AMyPawn::MoveRight);
-
 		PlayerInputComponent->BindAction("Fire", EInputEvent::IE_Pressed, this, &AMyPawn::Fire);
 	}
 	else {
 		PlayerInputComponent->BindAxis("MoveForward2", this, &AMyPawn::MoveForward);
 		PlayerInputComponent->BindAxis("MoveRight2", this, &AMyPawn::MoveRight);
-
 		PlayerInputComponent->BindAction("Fire2", EInputEvent::IE_Pressed, this, &AMyPawn::Fire);
 	}
 }
 
 void AMyPawn::MoveForward(float Value) {
-	if (Value != 0.0f && State == MyPawnState::ACTIVE) {
+	if (GameMode->ActiveControllerId == ControllerId &&
+		Value != 0.0f && State == MyPawnState::ACTIVE) {
 		MovementComponent->MoveForward(GetActorForwardVector() * Value);
 	}
 }
 
 void AMyPawn::MoveRight(float Value) {
-	if (Value != 0.0f && State == MyPawnState::ACTIVE) {
+	if (GameMode->ActiveControllerId == ControllerId &&
+		Value != 0.0f && State == MyPawnState::ACTIVE) {
 		AddControllerYawInput(Value);
 		ServerSetYaw(GetControlRotation().Yaw);
 	}
 }
 
 void AMyPawn::Fire_Implementation() {
-	if (State == MyPawnState::ACTIVE) {
-		State = MyPawnState::LAUNCHED;
-		CollisionComponent->AddForce(ForceAmount * GetActorForwardVector());
-	}
-	else if (State == MyPawnState::LAUNCHED) {
-		State = MyPawnState::ACTIVE;
-		CollisionComponent->DestroyPhysicsState();
-		SetYaw();
+	if (GameMode->ActiveControllerId == ControllerId) {
+		if (State == MyPawnState::ACTIVE) {
+			State = MyPawnState::LAUNCHED;
+			CollisionComponent->AddForce(ForceAmount * GetActorForwardVector());
+		}
+		else if (State == MyPawnState::LAUNCHED) {
+			State = MyPawnState::ACTIVE;
+			StopMovement();
 
-		CollisionComponent->BodyInstance = FBodyInstance();
-		SetupBodyInstance();
-
-		CollisionComponent->CreatePhysicsState();
+			auto next = (GameMode->ActiveControllerId + 1) % 2;
+			Instances[next]->StopMovement();
+			GameMode->ActiveControllerId = next;
+		}
 	}
+}
+
+void AMyPawn::StopMovement() 	{
+	CollisionComponent->DestroyPhysicsState();
+	SetYaw();
+	CollisionComponent->BodyInstance = FBodyInstance();
+	SetupBodyInstance();
+	CollisionComponent->CreatePhysicsState();
 }
 
 bool AMyPawn::Fire_Validate() {
