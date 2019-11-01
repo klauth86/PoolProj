@@ -27,9 +27,6 @@ ABall::ABall() {
 
 	Mesh->BodyInstance.bUseCCD = true;
 	Mesh->SetCollisionProfileName(TEXT("BlockAll"));
-
-	instanceCount++;
-	UE_LOG(LogTemp, Warning, TEXT("ABall %d"), instanceCount);
 }
 
 void ABall::EndPlay(const EEndPlayReason::Type EndPlayReason) {

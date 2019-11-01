@@ -15,6 +15,7 @@
 #include "Engine/SkeletalMesh.h"
 #include "Components/PrimitiveComponent.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "Components/ArrowComponent.h"
 #include "Camera/CameraComponent.h"
 
 #include "CustomStaticMeshComponent.h"
@@ -67,6 +68,9 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 		class UCameraComponent* FollowCamera;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
+		class UArrowComponent* ArrowComponent;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 		APoolProjAGameModeBase* GameMode;
 
@@ -115,6 +119,8 @@ public:
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
+
+	FORCEINLINE class UArrowComponent* GetArrowComponent() const { return ArrowComponent; }
 
 	FORCEINLINE int GetControllerId() const { return ControllerId; }
 };

@@ -47,6 +47,10 @@ AMyPawn::AMyPawn() {
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName); // Attach the camera to the end of the boom and let the boom adjust to match the controller orientation
 	FollowCamera->bUsePawnControlRotation = false; // Camera does not rotate relative to arm
+
+	ArrowComponent = CreateDefaultSubobject<UArrowComponent>(TEXT("ArrowComponent"));
+	ArrowComponent->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
+	ArrowComponent->SetRelativeRotation(FRotator(30, 0, 0));
 }
 
 void AMyPawn::SetupBodyInstance() {
@@ -83,14 +87,23 @@ void AMyPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) {
 
 void AMyPawn::MoveForward(float Value) {
 	if (GameMode->ActiveControllerId == ControllerId &&
-		Value != 0.0f && State == MyPawnState::ACTIVE) {
-		MovementComponent->MoveForward(GetActorForwardVector() * Value);
+		Value != 0.0f && State == MyPawnState::ACTIVE) {		
+		auto tolerance = 1e-6f;
+		if (CollisionComponent->GetPhysicsAngularVelocityInDegrees().SizeSquared() > tolerance) {
+			StopMovement();
+		}
+		MovementComponent->MoveForward(ArrowComponent->GetForwardVector() * Value);
 	}
 }
 
 void AMyPawn::MoveRight(float Value) {
 	if (GameMode->ActiveControllerId == ControllerId &&
 		Value != 0.0f && State == MyPawnState::ACTIVE) {
+		auto tolerance = 1e-6f;
+		if (CollisionComponent->GetPhysicsAngularVelocityInDegrees().SizeSquared() > tolerance) {
+			StopMovement();
+		}
+
 		AddControllerYawInput(Value);
 		ServerSetYaw(GetControlRotation().Yaw);
 	}
@@ -100,7 +113,7 @@ void AMyPawn::Fire_Implementation() {
 	if (GameMode->ActiveControllerId == ControllerId) {
 		if (State == MyPawnState::ACTIVE) {
 			State = MyPawnState::LAUNCHED;
-			CollisionComponent->AddForce(ForceAmount * GetActorForwardVector());
+			CollisionComponent->AddForce(ForceAmount * ArrowComponent->GetForwardVector());
 		}
 		else if (State == MyPawnState::LAUNCHED) {
 			State = MyPawnState::ACTIVE;
@@ -129,7 +142,7 @@ bool AMyPawn::Fire_Validate() {
 
 void AMyPawn::DrawRay() {
 	auto location = this->GetActorLocation();
-	auto forward = this->GetActorForwardVector();
+	auto forward = ArrowComponent->GetForwardVector();
 
 	DrawDebugLine(GetWorld(), location, location + forward * Sight,
 		FColor(255, 0, 0), false, 0.5f, 0.f, 3.f);

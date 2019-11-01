@@ -20,7 +20,7 @@ void APoolProjAGameModeBase::BeginPlay() {
 };
 
 void APoolProjAGameModeBase::CheckWinCondition() {
-	auto hasWinner = ABall::InstanceCount() == 0;
+	auto hasWinner = ABall::GetInstanceCount() == 0;
 	if (hasWinner) {
 
 		ActiveControllerId = -1;

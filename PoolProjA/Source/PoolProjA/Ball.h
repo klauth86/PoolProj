@@ -9,7 +9,7 @@
 
 #include "Ball.generated.h"
 
-UCLASS()
+UCLASS(Blueprintable)
 class POOLPROJA_API ABall : public AActor {
 	GENERATED_BODY()
 
@@ -27,6 +27,8 @@ private:
 protected:
 	static int instanceCount;
 public:
-	static int InstanceCount() { return instanceCount; };
-	static void ResetInstanceCount() { instanceCount = 0; };
+	UFUNCTION(BlueprintCallable)
+	static int GetInstanceCount() { return instanceCount; };
+	UFUNCTION(BlueprintCallable)
+	static void SetInstanceCount(int value) { instanceCount = value; };
 };
