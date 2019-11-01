@@ -13,8 +13,9 @@ APoolProjAGameModeBase::APoolProjAGameModeBase() {
 void APoolProjAGameModeBase::BeginPlay() {
 	Super::BeginPlay();
 	
-	auto playerCount = 1;
-	for (size_t i = 0; i < playerCount; i++) {
+	auto existingNumPlayers = GetNumPlayers();
+	auto targetNumPlayers = 2;
+	for (size_t i = existingNumPlayers; i < targetNumPlayers; i++) {
 		UGameplayStatics::CreatePlayer(this);
 	}
 };
