@@ -73,17 +73,24 @@ private:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 		APoolProjAGameModeBase* GameMode;
-
-	int ControllerId;
 protected:
+	void CommonMoveForward(float Val);
 	void MoveForward(float Val);
 
+	void CommonMoveRight(float Val);
 	void MoveRight(float Val);
 
 	UFUNCTION(Server, Reliable, WithValidation)
-	void Fire();
-	void Fire_Implementation();
-	bool Fire_Validate();
+	void CommonStopFire();
+	void CommonStopFire_Implementation();
+	bool CommonStopFire_Validate();
+	void StopFire();
+
+	UFUNCTION(Server, Reliable, WithValidation)
+	void CommonStartFire();
+	void CommonStartFire_Implementation();
+	bool CommonStartFire_Validate();
+	void StartFire();
 
 	void DrawRay();
 
@@ -121,6 +128,4 @@ public:
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
 
 	FORCEINLINE class UArrowComponent* GetArrowComponent() const { return ArrowComponent; }
-
-	FORCEINLINE int GetControllerId() const { return ControllerId; }
 };

@@ -66,28 +66,29 @@ void AMyPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 	
 	auto controller = Cast<APlayerController>(GetController());
-	ControllerId = UGameplayStatics::GetPlayerControllerID(controller);
-	Instances.Add(ControllerId, this);
+	Instances.Add(UGameplayStatics::GetPlayerControllerID(controller), this);
 
 	auto gameMode = Cast<APoolProjAGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
 	if (gameMode)
 		GameMode = gameMode;
 
-	if (ControllerId == 0) {
-		PlayerInputComponent->BindAxis("MoveForward", this, &AMyPawn::MoveForward);
-		PlayerInputComponent->BindAxis("MoveRight", this, &AMyPawn::MoveRight);
-		PlayerInputComponent->BindAction("Fire", EInputEvent::IE_Pressed, this, &AMyPawn::Fire);
-	}
-	else {
-		PlayerInputComponent->BindAxis("MoveForward2", this, &AMyPawn::MoveForward);
-		PlayerInputComponent->BindAxis("MoveRight2", this, &AMyPawn::MoveRight);
-		PlayerInputComponent->BindAction("Fire2", EInputEvent::IE_Pressed, this, &AMyPawn::Fire);
+	PlayerInputComponent->BindAxis("MoveForward", this, &AMyPawn::CommonMoveForward);
+	PlayerInputComponent->BindAxis("MoveRight", this, &AMyPawn::CommonMoveRight);
+	PlayerInputComponent->BindAction("Fire", EInputEvent::IE_Pressed, this, &AMyPawn::CommonStartFire);
+	PlayerInputComponent->BindAction("Fire", EInputEvent::IE_Released, this, &AMyPawn::CommonStopFire);
+}
+
+
+
+void AMyPawn::CommonMoveForward(float Value) {
+	if (Instances.Contains(GameMode->ActiveControllerId)) {
+		auto pawn = Instances[GameMode->ActiveControllerId];
+		pawn->MoveForward(Value);
 	}
 }
 
 void AMyPawn::MoveForward(float Value) {
-	if (GameMode->ActiveControllerId == ControllerId &&
-		Value != 0.0f && State == MyPawnState::ACTIVE) {		
+	if (Value != 0.0f && State == MyPawnState::ACTIVE) {		
 		auto tolerance = 1e-6f;
 		if (CollisionComponent->GetPhysicsAngularVelocityInDegrees().SizeSquared() > tolerance) {
 			StopMovement();
@@ -96,9 +97,15 @@ void AMyPawn::MoveForward(float Value) {
 	}
 }
 
+void AMyPawn::CommonMoveRight(float Value) {
+	if (Instances.Contains(GameMode->ActiveControllerId)) {
+		auto pawn = Instances[GameMode->ActiveControllerId];
+		pawn->MoveRight(Value);
+	}
+}
+
 void AMyPawn::MoveRight(float Value) {
-	if (GameMode->ActiveControllerId == ControllerId &&
-		Value != 0.0f && State == MyPawnState::ACTIVE) {
+	if (Value != 0.0f && State == MyPawnState::ACTIVE) {
 		auto tolerance = 1e-6f;
 		if (CollisionComponent->GetPhysicsAngularVelocityInDegrees().SizeSquared() > tolerance) {
 			StopMovement();
@@ -109,33 +116,58 @@ void AMyPawn::MoveRight(float Value) {
 	}
 }
 
-void AMyPawn::Fire_Implementation() {
-	if (GameMode->ActiveControllerId == ControllerId) {
-		if (State == MyPawnState::ACTIVE) {
-			State = MyPawnState::LAUNCHED;
-			CollisionComponent->AddForce(ForceAmount * ArrowComponent->GetForwardVector());
-		}
-		else if (State == MyPawnState::LAUNCHED) {
-			State = MyPawnState::ACTIVE;
-			StopMovement();
 
-			auto next = (GameMode->ActiveControllerId + 1) % 2;
-			Instances[next]->StopMovement();
-			GameMode->ActiveControllerId = next;
-		}
+
+void AMyPawn::CommonStartFire_Implementation() {
+	if (Instances.Contains(GameMode->ActiveControllerId)) {
+		auto pawn = Instances[GameMode->ActiveControllerId];
+		pawn->StartFire();
 	}
 }
 
-void AMyPawn::StopMovement() 	{
+bool AMyPawn::CommonStartFire_Validate() {
+	return true;
+}
+
+void AMyPawn::StartFire() {
+	if (State == MyPawnState::ACTIVE) {
+		State = MyPawnState::LAUNCHED;
+		CollisionComponent->AddForce(ForceAmount * ArrowComponent->GetForwardVector());
+	}
+}
+
+
+
+void AMyPawn::CommonStopFire_Implementation() {
+	if (Instances.Contains(GameMode->ActiveControllerId)) {
+		auto pawn = Instances[GameMode->ActiveControllerId];
+		pawn->StopFire();
+	}
+}
+
+bool AMyPawn::CommonStopFire_Validate() {
+	return true;
+}
+
+void AMyPawn::StopFire() 	{
+	if (State == MyPawnState::LAUNCHED) {
+		State = MyPawnState::ACTIVE;
+		StopMovement();
+
+		auto next = (GameMode->ActiveControllerId + 1) % 2;
+		Instances[next]->StopMovement();
+		GameMode->ActiveControllerId = next;
+	}
+}
+
+
+
+void AMyPawn::StopMovement() {
 	CollisionComponent->DestroyPhysicsState();
 	SetYaw();
 	CollisionComponent->BodyInstance = FBodyInstance();
 	SetupBodyInstance();
 	CollisionComponent->CreatePhysicsState();
-}
-
-bool AMyPawn::Fire_Validate() {
-	return true;
 }
 
 
