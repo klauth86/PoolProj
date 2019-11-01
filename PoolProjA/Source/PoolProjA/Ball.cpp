@@ -29,9 +29,11 @@ ABall::ABall() {
 	Mesh->SetCollisionProfileName(TEXT("BlockAll"));
 
 	instanceCount++;
+	UE_LOG(LogTemp, Warning, TEXT("ABall %d"), instanceCount);
 }
 
-void ABall::Hit() {
+void ABall::EndPlay(const EEndPlayReason::Type EndPlayReason) {
+	Super::EndPlay(EndPlayReason);
 	instanceCount--;
-	Destroy();
+	UE_LOG(LogTemp, Warning, TEXT("~ABall %d"), instanceCount);
 }

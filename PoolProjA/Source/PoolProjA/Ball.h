@@ -15,8 +15,7 @@ class POOLPROJA_API ABall : public AActor {
 
 public:
 	ABall();
-
-	void Hit();
+	void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 	UPROPERTY(EditAnywhere, Category = MyPawn)
 		float Mass = 1;
@@ -29,5 +28,5 @@ protected:
 	static int instanceCount;
 public:
 	static int InstanceCount() { return instanceCount; };
-
+	static void ResetInstanceCount() { instanceCount = 0; };
 };

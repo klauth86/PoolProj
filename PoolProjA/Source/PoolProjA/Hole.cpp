@@ -27,7 +27,7 @@ void AHole::CallOnActorBeginOverlap(AActor* actor, AActor* otherActor) {
 	auto ball = Cast<ABall>(otherActor);
 	if (ball) {
 		
-		ball->Hit();
+		ball->Destroy();
 
 		auto world = GetWorld();
 		if (world) {
