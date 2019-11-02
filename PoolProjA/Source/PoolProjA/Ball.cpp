@@ -1,7 +1,5 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#pragma once
-
 #include "Ball.h"
 
 int ABall::instanceCount = 0;

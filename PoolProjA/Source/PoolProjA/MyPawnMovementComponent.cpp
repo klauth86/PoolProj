@@ -1,5 +1,3 @@
-#pragma once
-
 #include "MyPawnMovementComponent.h"
 
 UMyPawnMovementComponent::UMyPawnMovementComponent(const FObjectInitializer& ObjectInitializer)
