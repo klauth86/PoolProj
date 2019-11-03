@@ -116,6 +116,7 @@ protected:
 
 	void StopMovement();
 
+	void BeginPlay() override;
 public:
 	FORCEINLINE class UCustomStaticMeshComponent* GetCollisionComponent() const { return CollisionComponent; }
 

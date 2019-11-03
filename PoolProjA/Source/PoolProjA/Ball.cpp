@@ -19,7 +19,6 @@ ABall::ABall() {
 	static ConstructorHelpers::FObjectFinder<UMaterialInstance> matAsset(TEXT("Material'/Game/Models/BaseColorMAT_Ball.BaseColorMAT_Ball'"));
 	Mesh->SetMaterial(0, matAsset.Object);
 
-	Mesh->SetMassOverrideInKg("", Mass, true);
 	Mesh->SetSimulatePhysics(true);
 	Mesh->SetNotifyRigidBodyCollision(true);
 
@@ -31,4 +30,8 @@ void ABall::EndPlay(const EEndPlayReason::Type EndPlayReason) {
 	Super::EndPlay(EndPlayReason);
 	instanceCount--;
 	UE_LOG(LogTemp, Warning, TEXT("~ABall %d"), instanceCount);
+}
+
+void ABall::BeginPlay() {
+	Mesh->SetMassOverrideInKg("", Mass, true);
 }

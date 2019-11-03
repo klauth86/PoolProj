@@ -21,8 +21,6 @@ AMyPawn::AMyPawn() {
 	CollisionComponent->SetStaticMesh(meshAsset.Object);
 	CollisionComponent->SetVisibility(false);
 
-	SetupBodyInstance();
-
 	MeshComponent = CreateDefaultSubobject<USkeletalMeshComponent>("MeshComponent");
 	static ConstructorHelpers::FObjectFinder<USkeletalMesh> smeshAsset(TEXT("SkeletalMesh'/Game/Models/EyeBall/EyeBall.EyeBall'"));
 	MeshComponent->SetSkeletalMesh(smeshAsset.Object);
@@ -49,6 +47,10 @@ AMyPawn::AMyPawn() {
 	ArrowComponent = CreateDefaultSubobject<UArrowComponent>(TEXT("ArrowComponent"));
 	ArrowComponent->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
 	ArrowComponent->SetRelativeRotation(FRotator(30, 0, 0));
+}
+
+void AMyPawn::BeginPlay() {
+	SetupBodyInstance();
 }
 
 void AMyPawn::SetupBodyInstance() {

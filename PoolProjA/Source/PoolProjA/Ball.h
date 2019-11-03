@@ -26,6 +26,8 @@ private:
 
 protected:
 	static int instanceCount;
+
+	void BeginPlay() override;
 public:
 	UFUNCTION(BlueprintCallable)
 	static int GetInstanceCount() { return instanceCount; };
