@@ -50,6 +50,7 @@ AMyPawn::AMyPawn() {
 }
 
 void AMyPawn::BeginPlay() {
+	Super::BeginPlay();
 	SetupBodyInstance();
 }
 
