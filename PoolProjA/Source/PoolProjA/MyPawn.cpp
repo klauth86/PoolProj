@@ -25,8 +25,6 @@ AMyPawn::AMyPawn() {
 	static ConstructorHelpers::FObjectFinder<USkeletalMesh> smeshAsset(TEXT("SkeletalMesh'/Game/Models/EyeBall/EyeBall.EyeBall'"));
 	MeshComponent->SetSkeletalMesh(smeshAsset.Object);
 	MeshComponent->SetupAttachment(RootComponent);
-	static ConstructorHelpers::FObjectFinder<UAnimBlueprint> smeshAnimBP(TEXT("AnimBlueprint'/Game/Models/EyeBall/EyeBall_Anim_BP.EyeBall_Anim_BP'"));
-	MeshComponent->SetAnimInstanceClass(smeshAnimBP.Object->GeneratedClass);
 
 	MovementComponent = CreateDefaultSubobject<UMyPawnMovementComponent>("MovementComponent");
 
