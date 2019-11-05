@@ -11,7 +11,7 @@
 #include "UObject/ConstructorHelpers.h"
 #include "Materials/Material.h"
 #include "Kismet/GameplayStatics.h"
-#include "Animation/AnimBlueprint.h"
+
 #include "Engine/SkeletalMesh.h"
 #include "Components/PrimitiveComponent.h"
 #include "GameFramework/SpringArmComponent.h"
@@ -70,9 +70,6 @@ private:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 		class UArrowComponent* ArrowComponent;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-		APoolProjAGameModeBase* GameMode;
 protected:
 	void CommonMoveForward(float Val);
 	void MoveForward(float Val);

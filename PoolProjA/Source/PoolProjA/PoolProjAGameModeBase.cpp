@@ -3,6 +3,8 @@
 #include "PoolProjAGameModeBase.h"
 #include "MyPawn.h"
 
+APoolProjAGameModeBase* APoolProjAGameModeBase::_currentGameMode = 0;
+
 APoolProjAGameModeBase::APoolProjAGameModeBase() {
 	DefaultPawnClass = AMyPawn::StaticClass();
 	ResetScore();
@@ -11,6 +13,8 @@ APoolProjAGameModeBase::APoolProjAGameModeBase() {
 void APoolProjAGameModeBase::BeginPlay() {
 	Super::BeginPlay();
 	
+	_currentGameMode = this;
+
 	auto existingNumPlayers = GetNumPlayers();
 	auto targetNumPlayers = 2;
 	for (size_t i = existingNumPlayers; i < targetNumPlayers; i++) {
@@ -18,9 +22,12 @@ void APoolProjAGameModeBase::BeginPlay() {
 	}
 };
 
-void APoolProjAGameModeBase::CheckWinCondition() {
-	auto hasWinner = ABall::GetInstanceCount() == 0;
-	if (hasWinner) {
+void APoolProjAGameModeBase::EndPlay(const EEndPlayReason::Type EndPlayReason) {
+	_currentGameMode = 0;
+}
+
+void APoolProjAGameModeBase::CheckWinCondition(int ballCount) {
+	if (ballCount == 0) {
 
 		ActiveControllerId = -1;
 
@@ -30,6 +37,8 @@ void APoolProjAGameModeBase::CheckWinCondition() {
 		else {
 			Winner = FName("Player 2");
 		}
+
+		UE_LOG(LogTemp, Warning, TEXT("CheckWinCondition %d"), ballCount);
 	}
 }
 

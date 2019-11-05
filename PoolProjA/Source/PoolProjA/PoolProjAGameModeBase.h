@@ -6,7 +6,6 @@
 #include "GameFramework/GameModeBase.h"
 #include "Kismet/GameplayStatics.h"
 
-#include "Ball.h"
 #include "GameModeWithUI.h"
 
 #include "PoolProjAGameModeBase.generated.h"
@@ -23,7 +22,7 @@ public:
 
 	APoolProjAGameModeBase();
 
-	void CheckWinCondition();
+	void CheckWinCondition(int ballCount);
 
 	void ResetScore();
 
@@ -39,7 +38,19 @@ public:
 	UPROPERTY(BlueprintReadOnly)
 		FName Winner;
 
+	void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+
 protected:
 
 	void BeginPlay() override;
+
+#pragma region STATIC
+
+public:
+	static APoolProjAGameModeBase* GetCurrentGameMode() { return _currentGameMode; };
+
+protected:
+	static APoolProjAGameModeBase* _currentGameMode;
+
+#pragma endregion
 };

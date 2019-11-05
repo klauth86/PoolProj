@@ -67,10 +67,6 @@ void AMyPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) {
 	auto controller = Cast<APlayerController>(GetController());
 	Instances.Add(UGameplayStatics::GetPlayerControllerID(controller), this);
 
-	auto gameMode = Cast<APoolProjAGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
-	if (gameMode)
-		GameMode = gameMode;
-
 	PlayerInputComponent->BindAxis("MoveForward", this, &AMyPawn::CommonMoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &AMyPawn::CommonMoveRight);
 	PlayerInputComponent->BindAction("Fire", EInputEvent::IE_Pressed, this, &AMyPawn::CommonStartFire);
@@ -80,9 +76,11 @@ void AMyPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) {
 
 
 void AMyPawn::CommonMoveForward(float Value) {
-	if (Instances.Contains(GameMode->ActiveControllerId)) {
-		auto pawn = Instances[GameMode->ActiveControllerId];
-		pawn->MoveForward(Value);
+	if (auto myGameMode = APoolProjAGameModeBase::GetCurrentGameMode()) {
+		if (Instances.Contains(myGameMode->ActiveControllerId)) {
+			auto pawn = Instances[myGameMode->ActiveControllerId];
+			pawn->MoveForward(Value);
+		}
 	}
 }
 
@@ -97,9 +95,11 @@ void AMyPawn::MoveForward(float Value) {
 }
 
 void AMyPawn::CommonMoveRight(float Value) {
-	if (Instances.Contains(GameMode->ActiveControllerId)) {
-		auto pawn = Instances[GameMode->ActiveControllerId];
-		pawn->MoveRight(Value);
+	if (auto myGameMode = APoolProjAGameModeBase::GetCurrentGameMode()) {
+		if (Instances.Contains(myGameMode->ActiveControllerId)) {
+			auto pawn = Instances[myGameMode->ActiveControllerId];
+			pawn->MoveRight(Value);
+		}
 	}
 }
 
@@ -118,9 +118,11 @@ void AMyPawn::MoveRight(float Value) {
 
 
 void AMyPawn::CommonStartFire_Implementation() {
-	if (Instances.Contains(GameMode->ActiveControllerId)) {
-		auto pawn = Instances[GameMode->ActiveControllerId];
-		pawn->StartFire();
+	if (auto myGameMode = APoolProjAGameModeBase::GetCurrentGameMode()) {
+		if (Instances.Contains(myGameMode->ActiveControllerId)) {
+			auto pawn = Instances[myGameMode->ActiveControllerId];
+			pawn->StartFire();
+		}
 	}
 }
 
@@ -138,9 +140,11 @@ void AMyPawn::StartFire() {
 
 
 void AMyPawn::CommonStopFire_Implementation() {
-	if (Instances.Contains(GameMode->ActiveControllerId)) {
-		auto pawn = Instances[GameMode->ActiveControllerId];
-		pawn->StopFire();
+	if (auto myGameMode = APoolProjAGameModeBase::GetCurrentGameMode()) {
+		if (Instances.Contains(myGameMode->ActiveControllerId)) {
+			auto pawn = Instances[myGameMode->ActiveControllerId];
+			pawn->StopFire();
+		}
 	}
 }
 
@@ -153,9 +157,10 @@ void AMyPawn::StopFire() 	{
 		State = MyPawnState::ACTIVE;
 		StopMovement();
 
-		auto next = (GameMode->ActiveControllerId + 1) % 2;
+		auto myGameMode = APoolProjAGameModeBase::GetCurrentGameMode();
+		auto next = (myGameMode->ActiveControllerId + 1) % 2;
 		Instances[next]->StopMovement();
-		GameMode->ActiveControllerId = next;
+		myGameMode->ActiveControllerId = next;
 	}
 }
 

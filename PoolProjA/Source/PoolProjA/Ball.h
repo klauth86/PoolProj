@@ -6,7 +6,7 @@
 #include "GameFramework/Actor.h"
 #include "UObject/ConstructorHelpers.h"
 #include "Materials/Material.h"
-
+#include "PoolProjAGameModeBase.h"
 #include "Ball.generated.h"
 
 UCLASS(Blueprintable)
@@ -15,6 +15,7 @@ class POOLPROJA_API ABall : public AActor {
 
 public:
 	ABall();
+
 	void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 	UPROPERTY(EditAnywhere, Category = MyPawn)
@@ -33,4 +34,6 @@ public:
 	static int GetInstanceCount() { return instanceCount; };
 	UFUNCTION(BlueprintCallable)
 	static void SetInstanceCount(int value) { instanceCount = value; };
+
+	void Tick(float DeltaSeconds) override;
 };

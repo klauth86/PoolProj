@@ -24,14 +24,36 @@ ABall::ABall() {
 
 	Mesh->BodyInstance.bUseCCD = true;
 	Mesh->SetCollisionProfileName(TEXT("BlockAll"));
+
+	UE_LOG(LogTemp, Warning, TEXT("Ctor"));
 }
 
 void ABall::EndPlay(const EEndPlayReason::Type EndPlayReason) {
 	Super::EndPlay(EndPlayReason);
 	instanceCount--;
+
+	if (auto myGameMode = APoolProjAGameModeBase::GetCurrentGameMode()) {
+		myGameMode->CheckWinCondition(instanceCount);
+	}
+
 	UE_LOG(LogTemp, Warning, TEXT("~ABall %d"), instanceCount);
 }
 
 void ABall::BeginPlay() {
+
+	UE_LOG(LogTemp, Warning, TEXT("BeginPlay"));
+
+	Super::BeginPlay();
+
 	Mesh->SetMassOverrideInKg("", Mass, true);
 }
+
+void ABall::Tick(float DeltaSeconds) {
+	Super::Tick(DeltaSeconds);
+
+	if (GetActorLocation().SizeSquared() > 90000) {
+		Destroy();
+		UE_LOG(LogTemp, Warning, TEXT("TickDestroy"));
+	}
+}
+

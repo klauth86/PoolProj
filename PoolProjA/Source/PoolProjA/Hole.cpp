@@ -23,29 +23,16 @@ AHole::AHole() {
 
 void AHole::CallOnActorBeginOverlap(AActor* actor, AActor* otherActor) {
 	auto ball = Cast<ABall>(otherActor);
-	if (ball) {
-		
-		ball->Destroy();
-
-		auto world = GetWorld();
-		if (world) {
-
-			auto gameMode =
-				UGameplayStatics::GetGameMode(world);
-			auto myGameMode =
-				Cast<APoolProjAGameModeBase>(gameMode);
-
-			if (myGameMode != nullptr) {
-					if (MyOwnerControllerId == 0) {
-						myGameMode->Player2Score++;
-					}
-					else {
-						myGameMode->Player1Score++;
-					}
-
-				myGameMode->CheckWinCondition();
+	if (ball) {		
+		if (auto myGameMode = APoolProjAGameModeBase::GetCurrentGameMode()) {
+			if (MyOwnerControllerId == 0) {
+				myGameMode->Player2Score++;
+			}
+			else {
+				myGameMode->Player1Score++;
 			}
 		}
+		ball->Destroy();
 	}
 }
 

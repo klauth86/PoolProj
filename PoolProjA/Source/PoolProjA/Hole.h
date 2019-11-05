@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "Engine/GameEngine.h"
+
 #include "UObject/ConstructorHelpers.h"
 #include "Materials/Material.h"
 
