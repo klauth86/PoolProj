@@ -23,9 +23,8 @@ public:
 
 	UPROPERTY(Category = Hole, EditAnywhere)
 		int MyOwnerControllerId = -1;
-protected:
 
-	virtual ~AHole();
+	void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 private:
 

@@ -36,6 +36,7 @@ void AHole::CallOnActorBeginOverlap(AActor* actor, AActor* otherActor) {
 	}
 }
 
-AHole::~AHole() {
+void AHole::EndPlay(const EEndPlayReason::Type EndPlayReason) {
+	Super::EndPlay(EndPlayReason);
 	this->OnActorBeginOverlap.RemoveAll(this);
 }
