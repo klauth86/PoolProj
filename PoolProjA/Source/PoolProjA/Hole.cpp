@@ -14,8 +14,6 @@ AHole::AHole() {
 	Mesh->BodyInstance.bUseCCD = true;
 	Mesh->SetCollisionProfileName(TEXT("OverlapAll"));
 
-	Mesh->SetRelativeScale3D(FVector(2, 2, 2));
-
 	Mesh->SetMobility(EComponentMobility::Type::Static);
 
 	this->OnActorBeginOverlap.AddDynamic(this, &AHole::CallOnActorBeginOverlap);
