@@ -47,10 +47,42 @@ AMyPawn::AMyPawn() {
 	ArrowComponent->SetRelativeRotation(FRotator(30, 0, 0));
 }
 
+
+
 void AMyPawn::BeginPlay() {
 	Super::BeginPlay();
 	SetupBodyInstance();
+
+	StartLocation = GetActorLocation();
+	StartRotation = GetActorRotation();
 }
+
+
+
+void AMyPawn::Tick(float DeltaSeconds) {
+	Super::Tick(DeltaSeconds);
+
+	if (GetActorLocation().SizeSquared() > 90000) {
+		if (auto myGameMode = APoolProjAGameModeBase::GetCurrentGameMode()) {
+			if (Instances[0] == this) {
+				myGameMode->Player1Score--;
+			}
+			else {
+				myGameMode->Player2Score--;
+			}
+
+			SetActorLocation(StartLocation);
+			StopMovement();
+
+			auto controller = Cast<APlayerController>(GetController());
+			float calcValue = (StartRotation.Yaw - GetActorRotation().Yaw)/controller->InputYawScale;
+			AddControllerYawInput(calcValue);
+			ServerSetYaw(StartRotation.Yaw);
+		}
+	}
+}
+
+
 
 void AMyPawn::SetupBodyInstance() {
 	CollisionComponent->SetMassOverrideInKg("", Mass, true);
@@ -60,6 +92,8 @@ void AMyPawn::SetupBodyInstance() {
 	CollisionComponent->BodyInstance.bUseCCD = true;
 	CollisionComponent->SetCollisionProfileName(TEXT("BlockAll"));
 }
+
+
 
 void AMyPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
@@ -93,6 +127,8 @@ void AMyPawn::MoveForward(float Value) {
 		MovementComponent->MoveForward(ArrowComponent->GetForwardVector() * Value);
 	}
 }
+
+
 
 void AMyPawn::CommonMoveRight(float Value) {
 	if (auto myGameMode = APoolProjAGameModeBase::GetCurrentGameMode()) {
@@ -204,6 +240,8 @@ void AMyPawn::SetYaw() {
 	rotation.Yaw = Yaw;
 	SetActorRotation(rotation);
 }
+
+
 
 void AMyPawn::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);

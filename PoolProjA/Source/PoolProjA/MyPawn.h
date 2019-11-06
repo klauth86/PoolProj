@@ -17,6 +17,7 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "Components/ArrowComponent.h"
 #include "Camera/CameraComponent.h"
+#include "GameFramework/PlayerController.h"
 
 #include "CustomStaticMeshComponent.h"
 #include "MyPawnMovementComponent.h"
@@ -39,6 +40,8 @@ public:
 	AMyPawn();
 
 	void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
+	void Tick(float DeltaSeconds) override;
 
 	UPROPERTY(EditAnywhere, Category = MyPawn)
 		float Sight = 5000; // In Sm
@@ -70,6 +73,12 @@ private:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 		class UArrowComponent* ArrowComponent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
+		FVector StartLocation;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
+		FRotator StartRotation;
 protected:
 	void CommonMoveForward(float Val);
 	void MoveForward(float Val);
