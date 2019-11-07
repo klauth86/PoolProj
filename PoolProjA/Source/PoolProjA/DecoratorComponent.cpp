@@ -7,10 +7,22 @@ void UDecoratorComponent::TickComponent(float DeltaTime, enum ELevelTick TickTyp
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 	auto world = GetWorld();
 	SetRelativeLocation(Origin + Magnitude * OscDirection * FMath::Cos(AngularVelocity * world->TimeSeconds));
-	UE_LOG(LogTemp, Warning, TEXT("%s"), *Origin.ToString());
 }
 
 UDecoratorComponent::UDecoratorComponent() {
 	PrimaryComponentTick.bStartWithTickEnabled = true;
 	PrimaryComponentTick.bCanEverTick = true;
+
+	SetCollisionProfileName(TEXT("NoCollision"));
+	bIsActive = true;
+}
+
+void UDecoratorComponent::SetActive(bool newIsActive) {
+
+	if (bIsActive == newIsActive)
+		return;
+
+	bIsActive = newIsActive;
+	SetHiddenInGame(!newIsActive);
+	SetComponentTickEnabled(newIsActive);
 }

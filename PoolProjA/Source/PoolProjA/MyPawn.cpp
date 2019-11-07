@@ -109,7 +109,10 @@ void AMyPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 	
 	auto controller = Cast<APlayerController>(GetController());
-	Instances.Add(UGameplayStatics::GetPlayerControllerID(controller), this);
+	auto controllerId = UGameplayStatics::GetPlayerControllerID(controller);
+	Instances.Add(controllerId, this);
+	DecoratorComponent->SetActive(controllerId == 0);
+
 
 	PlayerInputComponent->BindAxis("MoveForward", this, &AMyPawn::CommonMoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &AMyPawn::CommonMoveRight);
@@ -200,12 +203,20 @@ bool AMyPawn::CommonStopFire_Validate() {
 
 void AMyPawn::StopFire() 	{
 	if (State == MyPawnState::LAUNCHED) {
+		
+		auto myGameMode = APoolProjAGameModeBase::GetCurrentGameMode();
+
 		State = MyPawnState::ACTIVE;
 		StopMovement();
+		DecoratorComponent->SetActive(false);
+		UE_LOG(LogTemp, Warning, TEXT("%d"), myGameMode->ActiveControllerId);
 
-		auto myGameMode = APoolProjAGameModeBase::GetCurrentGameMode();
 		auto next = (myGameMode->ActiveControllerId + 1) % 2;
+		
 		Instances[next]->StopMovement();
+		Instances[next]->DecoratorComponent->SetActive(true);
+		UE_LOG(LogTemp, Warning, TEXT("%d"), next);
+
 		myGameMode->ActiveControllerId = next;
 	}
 }
