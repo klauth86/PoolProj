@@ -15,19 +15,19 @@ class POOLPROJA_API UDecoratorComponent : public UStaticMeshComponent
 	GENERATED_BODY()
 
 public:
+	UDecoratorComponent();
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Decorator)
 		float AngularVelocity = 5.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Decorator)
-		FVector Magnitude;
-	
+		float Magnitude = 1.f;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Decorator)
-		FVector TargetOffset;
+		FVector OscDirection;
 
-	virtual void OnRegister() override;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Decorator)
+		FVector Origin;
+
 	void TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction *ThisTickFunction) override;
-	virtual void ApplyWorldOffset(const FVector& InOffset, bool bWorldShift) override;
-
-protected:
-	virtual void UpdateDesiredArmLocation(float DeltaTime);
 };

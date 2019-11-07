@@ -5,19 +5,12 @@
 
 void UDecoratorComponent::TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-	UpdateDesiredArmLocation(DeltaTime);
+	auto world = GetWorld();
+	SetRelativeLocation(Origin + Magnitude * OscDirection * FMath::Cos(AngularVelocity * world->TimeSeconds));
+	UE_LOG(LogTemp, Warning, TEXT("%s"), *Origin.ToString());
 }
 
-void UDecoratorComponent::ApplyWorldOffset(const FVector & InOffset, bool bWorldShift) {
-	Super::ApplyWorldOffset(InOffset, bWorldShift);
-}
-
-void UDecoratorComponent::OnRegister() {
-	Super::OnRegister();
-	UpdateDesiredArmLocation(0.f);
-}
-
-void UDecoratorComponent::UpdateDesiredArmLocation(float DeltaTime) {
-	FVector position = GetComponentLocation() + TargetOffset;
-	FRotator rotation = FRotator::ZeroRotator;
+UDecoratorComponent::UDecoratorComponent() {
+	PrimaryComponentTick.bStartWithTickEnabled = true;
+	PrimaryComponentTick.bCanEverTick = true;
 }

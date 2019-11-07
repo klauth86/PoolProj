@@ -45,6 +45,16 @@ AMyPawn::AMyPawn() {
 	ArrowComponent = CreateDefaultSubobject<UArrowComponent>(TEXT("ArrowComponent"));
 	ArrowComponent->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
 	ArrowComponent->SetRelativeRotation(FRotator(30, 0, 0));
+
+	DecoratorComponent = CreateDefaultSubobject<UDecoratorComponent>(TEXT("DecoratorComponent"));
+	DecoratorComponent->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
+
+	auto tmp = 30.f * FMath::Cos(FMath::DegreesToRadians(30));
+	auto origin = FVector(tmp * FMath::Cos(FMath::DegreesToRadians(30)), 0, tmp * FMath::Sin(FMath::DegreesToRadians(30)));
+
+	DecoratorComponent->SetRelativeLocation(origin);
+	DecoratorComponent->Origin = origin;
+	DecoratorComponent->OscDirection = FVector(-FMath::Cos(FMath::DegreesToRadians(30)), 0, FMath::Sin(FMath::DegreesToRadians(30)));
 }
 
 

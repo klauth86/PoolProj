@@ -19,6 +19,7 @@
 #include "Camera/CameraComponent.h"
 #include "GameFramework/PlayerController.h"
 
+#include "DecoratorComponent.h"
 #include "CustomStaticMeshComponent.h"
 #include "MyPawnMovementComponent.h"
 #include "PoolProjAGameModeBase.h"
@@ -74,10 +75,13 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 		class UArrowComponent* ArrowComponent;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = MyPawn, meta = (AllowPrivateAccess = "true"))
+		class UDecoratorComponent* DecoratorComponent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = MyPawn, meta = (AllowPrivateAccess = "true"))
 		FVector StartLocation;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = MyPawn, meta = (AllowPrivateAccess = "true"))
 		FRotator StartRotation;
 protected:
 	void CommonMoveForward(float Val);
@@ -135,4 +139,6 @@ public:
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
 
 	FORCEINLINE class UArrowComponent* GetArrowComponent() const { return ArrowComponent; }
+
+	FORCEINLINE class UDecoratorComponent* GetDecoratorComponent() const { return DecoratorComponent; }
 };
