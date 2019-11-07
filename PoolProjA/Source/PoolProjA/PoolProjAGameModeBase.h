@@ -47,9 +47,11 @@ protected:
 #pragma region STATIC
 
 public:
+	UFUNCTION(BlueprintPure, BlueprintCallable, Category = "APoolProjAGameModeBase")
 	static APoolProjAGameModeBase* GetCurrentGameMode() { return _currentGameMode; };
 
 protected:
+
 	static APoolProjAGameModeBase* _currentGameMode;
 
 #pragma endregion
