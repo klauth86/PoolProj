@@ -31,7 +31,7 @@ public:
 
 	void TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction *ThisTickFunction) override;
 
-	void SetActive(bool newIsActive);
+	void SetDecoratorVisibility(bool newIsActive);
 
 private:
 	bool bIsActive = true;

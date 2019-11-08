@@ -17,7 +17,7 @@ UDecoratorComponent::UDecoratorComponent() {
 	bIsActive = true;
 }
 
-void UDecoratorComponent::SetActive(bool newIsActive) {
+void UDecoratorComponent::SetDecoratorVisibility(bool newIsActive) {
 
 	if (bIsActive == newIsActive)
 		return;
