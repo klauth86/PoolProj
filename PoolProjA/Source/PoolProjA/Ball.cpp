@@ -1,6 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "Ball.h"
+#include "MyPawn.h"
 
 int ABall::instanceCount = 0;
 
@@ -25,6 +26,9 @@ ABall::ABall() {
 	Mesh->BodyInstance.bUseCCD = true;
 	Mesh->SetCollisionProfileName(TEXT("BlockAll"));
 
+	static ConstructorHelpers::FObjectFinder<USoundBase> sfxAsset(TEXT("SoundWave'/Game/SFX/Strike.Strike'"));
+	StrikeSfx = sfxAsset.Object;
+
 	UE_LOG(LogTemp, Warning, TEXT("Ctor"));
 }
 
@@ -36,6 +40,10 @@ void ABall::EndPlay(const EEndPlayReason::Type EndPlayReason) {
 		myGameMode->CheckWinCondition(instanceCount);
 	}
 
+	Mesh->OnComponentHit.RemoveDynamic(this, &ABall::OnCompHit);
+	
+	HitActors.Reset();
+
 	UE_LOG(LogTemp, Warning, TEXT("~ABall %d"), instanceCount);
 }
 
@@ -46,6 +54,7 @@ void ABall::BeginPlay() {
 	Super::BeginPlay();
 
 	Mesh->SetMassOverrideInKg("", Mass, true);
+	Mesh->OnComponentHit.AddDynamic(this, &ABall::OnCompHit);
 }
 
 void ABall::Tick(float DeltaSeconds) {
@@ -55,5 +64,32 @@ void ABall::Tick(float DeltaSeconds) {
 		Destroy();
 		UE_LOG(LogTemp, Warning, TEXT("TickDestroy"));
 	}
+
+	TArray<AActor*> endedHits;
+	for (auto item : HitActors) {
+		auto distance = (item.Key->GetActorLocation() - GetActorLocation()).SizeSquared();
+		if (distance > item.Value + 0.01) {
+			endedHits.Add(item.Key);
+		}
+	}
+
+	for (auto actor : endedHits) {
+		HitActors.Remove(actor);
+	}
 }
 
+void ABall::OnCompHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit) {
+	auto pawn = Cast<AMyPawn>(OtherActor);
+	if (pawn && !HitActors.Contains(OtherActor)) {
+		UGameplayStatics::PlaySoundAtLocation(this, StrikeSfx, (GetActorLocation() + OtherActor->GetActorLocation())/2);
+		HitActors.Add(OtherActor, (OtherActor->GetActorLocation() - GetActorLocation()).SizeSquared());
+		return;
+	}
+
+	auto ball = Cast<ABall>(OtherActor);
+	if (ball && !HitActors.Contains(OtherActor) && ball->Mesh->GetPhysicsLinearVelocity().SizeSquared() > Mesh->GetPhysicsLinearVelocity().SizeSquared()) {
+		UGameplayStatics::PlaySoundAtLocation(this, StrikeSfx, (GetActorLocation() + OtherActor->GetActorLocation()) / 2);
+		HitActors.Add(OtherActor, (OtherActor->GetActorLocation() - GetActorLocation()).SizeSquared());
+		return;
+	}
+}

@@ -83,6 +83,9 @@ private:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = MyPawn, meta = (AllowPrivateAccess = "true"))
 		FRotator StartRotation;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+		USoundBase* FallSfx;
 protected:
 	void CommonMoveForward(float Val);
 	void MoveForward(float Val);

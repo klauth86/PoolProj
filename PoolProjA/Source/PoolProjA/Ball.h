@@ -18,6 +18,9 @@ public:
 
 	void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
+	UFUNCTION()
+	void OnCompHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
+
 	UPROPERTY(EditAnywhere, Category = MyPawn)
 		float Mass = 1;
 
@@ -25,6 +28,10 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 		UStaticMeshComponent* Mesh;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+		USoundBase* StrikeSfx;
+	
+	TMap<AActor*, float> HitActors;
 protected:
 	static int instanceCount;
 

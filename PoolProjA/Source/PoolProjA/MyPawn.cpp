@@ -55,6 +55,9 @@ AMyPawn::AMyPawn() {
 	DecoratorComponent->SetRelativeLocation(origin);
 	DecoratorComponent->Origin = origin;
 	DecoratorComponent->OscDirection = FVector(-FMath::Cos(FMath::DegreesToRadians(30)), 0, FMath::Sin(FMath::DegreesToRadians(30)));
+
+	static ConstructorHelpers::FObjectFinder<USoundBase> sfxAsset(TEXT("SoundWave'/Game/SFX/LostPoint.LostPoint'"));
+	FallSfx = sfxAsset.Object;
 }
 
 
@@ -83,6 +86,7 @@ void AMyPawn::Tick(float DeltaSeconds) {
 
 			SetActorLocation(StartLocation);
 			StopMovement();
+			UGameplayStatics::PlaySound2D(this, FallSfx);
 
 			auto controller = Cast<APlayerController>(GetController());
 			float calcValue = (StartRotation.Yaw - GetActorRotation().Yaw)/controller->InputYawScale;

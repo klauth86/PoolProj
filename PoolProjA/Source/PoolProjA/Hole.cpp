@@ -16,6 +16,9 @@ AHole::AHole() {
 
 	Mesh->SetMobility(EComponentMobility::Type::Static);
 
+	static ConstructorHelpers::FObjectFinder<USoundBase> sfxAsset(TEXT("SoundWave'/Game/SFX/GainPoint.GainPoint'"));
+	GoalSfx = sfxAsset.Object;
+
 	this->OnActorBeginOverlap.AddDynamic(this, &AHole::CallOnActorBeginOverlap);
 }
 
@@ -31,6 +34,7 @@ void AHole::CallOnActorBeginOverlap(AActor* actor, AActor* otherActor) {
 			}
 		}
 		ball->Destroy();
+		UGameplayStatics::PlaySound2D(this, GoalSfx);
 	}
 }
 
