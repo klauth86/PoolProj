@@ -1,4 +1,8 @@
 // Fill out your copyright notice in the Description page of Project Settings.
+DECLARE_EVENT(APoolProjAGameModeBase, GainPointEvent)
+DECLARE_EVENT(APoolProjAGameModeBase, LostPointEvent)
+DECLARE_EVENT_OneParam(APoolProjAGameModeBase, HitEvent, FVector)
+DECLARE_EVENT(APoolProjAGameModeBase, GameOverEvent)
 
 #pragma once
 
@@ -7,6 +11,8 @@
 #include "Kismet/GameplayStatics.h"
 
 #include "GameModeWithUI.h"
+#include "Managers/AssetsStorageManager.h"
+#include "SfxManager.h"
 
 #include "PoolProjAGameModeBase.generated.h"
 
@@ -19,6 +25,23 @@ class POOLPROJA_API APoolProjAGameModeBase : public AGameModeWithUI
 	GENERATED_BODY()
 
 public:	
+
+#pragma region MANAGERS
+
+	AssetsStorageManager AssetsManager;
+	USfxManager* SfxManager;
+
+#pragma endregion
+
+
+#pragma region EVENTS
+
+	GainPointEvent OnGainPointEvent;
+	LostPointEvent OnLostPointEvent;
+	HitEvent OnHitEvent;
+	GameOverEvent OnGameOverEvent;
+
+#pragma endregion
 
 	APoolProjAGameModeBase();
 
